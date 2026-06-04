@@ -28,8 +28,10 @@ class Problem:
         assert self.kind in KINDS, f"unknown kind {self.kind!r}"
 
 
-def TRACE(algo: Algorithm, inputs: dict, note: str = "") -> Problem:
-    return Problem(algo, "trace", inputs, note=note)
+def TRACE(algo: Algorithm, inputs: dict, note: str = "", description: str = "") -> Problem:
+    """Trace the flowchart. `description` is an optional written use case /
+    plain-English statement of the algorithm shown before the flowchart."""
+    return Problem(algo, "trace", inputs, note=note, description=description)
 
 
 def DRAW(algo: Algorithm, description: str = "") -> Problem:
@@ -38,5 +40,5 @@ def DRAW(algo: Algorithm, description: str = "") -> Problem:
     return Problem(algo, "draw", description=description)
 
 
-def OUTPUTS(algo: Algorithm, cases: list, followup: str = "") -> Problem:
-    return Problem(algo, "outputs", cases=cases, followup=followup)
+def OUTPUTS(algo: Algorithm, cases: list, followup: str = "", note: str = "") -> Problem:
+    return Problem(algo, "outputs", cases=cases, followup=followup, note=note)

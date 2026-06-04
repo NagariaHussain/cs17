@@ -60,8 +60,9 @@ def _trace_instruction(inputs: dict) -> str:
     entered are 55, 82, 40 (in that order), and complete the trace table.'"""
     scalars = {k: v for k, v in inputs.items() if not isinstance(v, list)}
     queues = {k: v for k, v in inputs.items() if isinstance(v, list)}
-    text = r"Trace this algorithm for $%s$" % _esc(
-        ", ".join(f"{k} = {v}" for k, v in scalars.items()))
+    text = r"Trace this algorithm"
+    if scalars:
+        text += r" for $%s$" % _esc(", ".join(f"{k} = {v}" for k, v in scalars.items()))
     for k, vals in queues.items():
         text += r", where the values of $%s$ entered are %s (in that order)" % (
             _esc(k), _esc(", ".join(str(v) for v in vals)))
@@ -106,6 +107,8 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
 
     elif problem.kind == "trace":
         cols, rows, outputs = run(algo, problem.inputs)
+        if problem.description:  # written use case before the flowchart
+            parts.append(r"\begin{quote}\itshape %s\end{quote}" % _esc(problem.description))
         parts.append(_trace_instruction(problem.inputs))
         if problem.note:
             parts.append(r"\par\vspace{2pt}\textit{%s}" % _esc(problem.note))
@@ -126,6 +129,8 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
         parts.append(_fig(fig_path))
         label = r"(i)~" if problem.followup else ""
         parts.append(label + r"For each input below, follow the flowchart and write the output.")
+        if problem.note:
+            parts.append(r"\par\vspace{2pt}\textit{%s}" % _esc(problem.note))
         parts.append(r"\par\vspace{4pt}")
         parts.append(r"\begin{center}" + _outputs_table(algo, problem.cases, fill=answer)
                      + r"\end{center}")

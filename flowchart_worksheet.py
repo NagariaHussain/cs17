@@ -81,6 +81,40 @@ grades = Algorithm("Grades of n students", [
     ]),
 ])
 
+reverse_digits = Algorithm("Reverse the digits", [
+    read("n"),
+    assign("rev", "0"),
+    While("n > 0", [
+        assign("rev", "rev * 10 + n % 10"),
+        assign("n", "n // 10"),
+    ]),
+    out("rev"),
+])
+
+halving = Algorithm(
+    # shown as the answer to part (ii) on the answer key
+    "Counting halvings — doubling n adds only ONE step. "
+    "This is the secret behind binary search!",
+    [
+        read("n"),
+        assign("steps", "0"),
+        While("n > 1", [
+            assign("n", "n // 2"),
+            assign("steps", "steps + 1"),
+        ]),
+        out("steps"),
+    ])
+
+till_total = Algorithm("Till total", [
+    assign("total", "0"),
+    read("amount"),
+    While("amount != 0", [
+        assign("total", "total + amount"),
+        read("amount"),
+    ]),
+    out("total"),
+])
+
 PROBLEMS = [
     OUTPUTS(absolute, [{"n": 7}, {"n": -4}, {"n": 0}, {"n": -19}],
             followup="Can you tell what this algorithm is doing?"),
@@ -95,4 +129,17 @@ PROBLEMS = [
                      "1, 2, 3, … up to n, one by one: if a number is divisible "
                      "by 3, print “buzz”; otherwise print the number itself."),
     TRACE(grades, {"n": 3, "marks": [55, 82, 40]}),
+    OUTPUTS(reverse_digits, [{"n": 123}, {"n": 47}, {"n": 5}, {"n": 470}],
+            followup="Can you tell what this algorithm is doing?",
+            note="Note: n % 10 gives the remainder after dividing by 10 — the "
+                 "last digit of n. For example, 472 % 10 = 2."),
+    OUTPUTS(halving, [{"n": 8}, {"n": 16}, {"n": 100}, {"n": 1000}],
+            followup="n grew from 8 all the way to 1000 — but look how little "
+                     "the output grew! Can you explain why?"),
+    TRACE(till_total, {"amount": [120, 75, 200, 0]},
+          description="A shopkeeper adds up the money received from each "
+                      "customer at the end of the day. She enters the amounts "
+                      "one by one, and enters 0 to say “no more” — the till "
+                      "then shows the total. Notice that the algorithm cannot "
+                      "know in advance how many customers there were!"),
 ]
