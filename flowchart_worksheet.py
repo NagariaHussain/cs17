@@ -115,6 +115,23 @@ till_total = Algorithm("Till total", [
     out("total"),
 ])
 
+# capstone: sentinel loop + counter + accumulator + conditional, all at once
+exam_report = Algorithm("Exam report", [
+    assign("count", "0"),
+    assign("total", "0"),
+    assign("passes", "0"),
+    read("marks"),
+    While("marks != -1", [
+        assign("count", "count + 1"),
+        assign("total", "total + marks"),
+        If("marks >= 40", [assign("passes", "passes + 1")]),
+        read("marks"),
+    ]),
+    out("count"),
+    out("total / count"),
+    out("passes"),
+])
+
 PROBLEMS = [
     OUTPUTS(absolute, [{"n": 7}, {"n": -4}, {"n": 0}, {"n": -19}],
             followup="Can you tell what this algorithm is doing?"),
@@ -143,4 +160,11 @@ PROBLEMS = [
                       "by one, and enters 0 when there are no more. The program "
                       "then shows the total. Notice that the algorithm cannot "
                       "know in advance how many customers there were!"),
+    DRAW(exam_report,
+         description="After an exam, the teacher enters each student’s marks "
+                     "one by one, and enters −1 when there are no more. The "
+                     "program should then print three things: how many students "
+                     "took the exam, their average marks, and how many of them "
+                     "passed (40 or more). (Why is −1 a better “no more” signal "
+                     "here than 0?)"),
 ]
