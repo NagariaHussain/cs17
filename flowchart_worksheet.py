@@ -69,5 +69,5 @@ PROBLEMS = [
     TRACE(count_multiples, {"n": 7}),
     TRACE(count_digits, {"n": 472},
           note="Note: n // 10 means whole-number division — divide and drop the "
-               "remainder. For example, 472 // 10 = 47."),
+               "remainder. For example, 472 // 10 = 47 (not 47.2)."),
 ]
