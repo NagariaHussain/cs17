@@ -156,6 +156,7 @@ flowgen/
   latex.py      pseudocode + trace table + document assembly
   build.py      CLI: worksheet module -> figures + worksheet/answers PDFs
 flowchart_worksheet.py   the questions
+wsbase.py      shared LaTeX setup (page geometry, cs17.org footer, Tectonic)
 ```
 
 Needs the `dot` binary: `brew install graphviz`.

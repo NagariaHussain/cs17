@@ -18,9 +18,9 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
-import subprocess
-import sys
 from pathlib import Path
+
+import wsbase
 
 from . import latex
 from .diagram import render
@@ -45,11 +45,6 @@ def _load_set(path: Path):
     title = getattr(mod, "TITLE", path.stem)
     problems = getattr(mod, "PROBLEMS")
     return title, problems
-
-
-def _compile(tex_path: Path):
-    # run with cwd at the .tex dir so figure paths stay relative & reproducible
-    subprocess.run(["tectonic", tex_path.name], cwd=tex_path.parent, check=True)
 
 
 def main(argv=None):
@@ -89,7 +84,7 @@ def main(argv=None):
         tex_path.write_text(tex)
         print(f"wrote {tex_path}")
         if not args.no_pdf:
-            _compile(tex_path)
+            wsbase.compile_tex(tex_path)
             print(f"compiled {tex_path.with_suffix('.pdf')}")
 
 

@@ -6,13 +6,14 @@ set -e
 
 staged=$(git diff --cached --name-only)
 
-if echo "$staged" | grep -qE '^(boolgen/|worksheet\.py$)'; then
+# wsbase.py is shared setup (footer, preamble, tectonic) -> rebuild everything
+if echo "$staged" | grep -qE '^(boolgen/|worksheet\.py$|wsbase\.py$)'; then
     echo "pre-commit: boolgen sources changed -> rebuilding boolean worksheet PDFs"
     make boolean
     git add build/worksheet
 fi
 
-if echo "$staged" | grep -qE '^(flowgen/|flowchart_worksheet\.py$)'; then
+if echo "$staged" | grep -qE '^(flowgen/|flowchart_worksheet\.py$|wsbase\.py$)'; then
     echo "pre-commit: flowgen sources changed -> rebuilding flowchart worksheet PDFs"
     make flowchart
     git add build/flowchart_worksheet

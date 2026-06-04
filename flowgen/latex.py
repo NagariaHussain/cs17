@@ -2,28 +2,15 @@
 
 from __future__ import annotations
 
+import wsbase
+
 from .algo import Algorithm, pseudocode_text, run
 
-_PREAMBLE = r"""\documentclass[11pt]{article}
-\usepackage[margin=2cm]{geometry}
-\usepackage{graphicx}
-\usepackage[export]{adjustbox}
-\usepackage{booktabs}
-\usepackage{listings}
-\usepackage[table]{xcolor}
+_PREAMBLE = wsbase.preamble(r"""\usepackage{listings}
 \usepackage{needspace}
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-\fancyhf{}
-\renewcommand{\headrulewidth}{0pt}
-\fancyfoot[L]{\small\textcolor{gray}{cs17.org}}
-\fancyfoot[C]{\thepage}
-\fancyfoot[R]{\small\textcolor{gray}{Author: Hussain Nagaria}}
 \lstset{basicstyle=\ttfamily\small, frame=single, framesep=4pt, xleftmargin=4pt,
         columns=fullflexible, keepspaces=true, aboveskip=2pt, belowskip=2pt}
-\setlength{\parindent}{0pt}
-\newcommand{\probrule}{\par\vspace{4pt}\textcolor{gray!50}{\hrulefill}\par\vspace{10pt}}
-"""
+""")
 
 
 def _esc(v) -> str:

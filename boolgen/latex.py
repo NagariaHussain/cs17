@@ -14,6 +14,8 @@ sheet), NOT the math ∧∨¬ notation:
 
 from __future__ import annotations
 
+import wsbase
+
 from .expr import Expr, Gate, Var, truth_table
 from .simplify import simplify
 
@@ -62,26 +64,11 @@ def truth_table_latex(e: Expr, *, fill: bool, out: str = "Y") -> str:
     return "\n".join(lines)
 
 
-_PREAMBLE = r"""\documentclass[11pt]{article}
-\usepackage[margin=2cm]{geometry}
-\usepackage{graphicx}
-\usepackage[export]{adjustbox}
-\usepackage{booktabs}
-\usepackage{amsmath}
+_PREAMBLE = wsbase.preamble(r"""\usepackage{amsmath}
 \usepackage{enumitem}
 \usepackage{titlesec}
-\usepackage{xcolor}
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-\fancyhf{}
-\renewcommand{\headrulewidth}{0pt}
-\fancyfoot[L]{\small\textcolor{gray}{cs17.org}}
-\fancyfoot[C]{\thepage}
-\fancyfoot[R]{\small\textcolor{gray}{Author: Hussain Nagaria}}
-\setlength{\parindent}{0pt}
 \titleformat{\section}{\large\bfseries}{}{0pt}{}
-\newcommand{\probrule}{\par\vspace{4pt}\textcolor{gray!50}{\hrulefill}\par\vspace{8pt}}
-"""
+""")
 
 
 def _fig(path):

@@ -11,8 +11,9 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
-import subprocess
 from pathlib import Path
+
+import wsbase
 
 from . import latex
 from .flowchart import render
@@ -23,10 +24,6 @@ def _load(path: Path):
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return getattr(mod, "TITLE", path.stem), getattr(mod, "PROBLEMS")
-
-
-def _compile(tex_path: Path):
-    subprocess.run(["tectonic", tex_path.name], cwd=tex_path.parent, check=True)
 
 
 def main(argv=None):
@@ -55,7 +52,7 @@ def main(argv=None):
         tex_path.write_text(tex)
         print(f"wrote {tex_path}")
         if not args.no_pdf:
-            _compile(tex_path)
+            wsbase.compile_tex(tex_path)
             print(f"compiled {tex_path.with_suffix('.pdf')}")
 
 
