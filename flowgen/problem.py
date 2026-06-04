@@ -22,6 +22,7 @@ class Problem:
     cases: list = field(default_factory=list)  # for "outputs": list of input dicts
     followup: str = ""  # open-ended part (ii); answer key shows algo.title
     note: str = ""      # in-question hint (e.g. explain notation not yet taught)
+    description: str = ""  # for "draw": plain-English statement instead of pseudocode
 
     def __post_init__(self):
         assert self.kind in KINDS, f"unknown kind {self.kind!r}"
@@ -31,8 +32,10 @@ def TRACE(algo: Algorithm, inputs: dict, note: str = "") -> Problem:
     return Problem(algo, "trace", inputs, note=note)
 
 
-def DRAW(algo: Algorithm) -> Problem:
-    return Problem(algo, "draw")
+def DRAW(algo: Algorithm, description: str = "") -> Problem:
+    """Draw the flowchart — from the derived pseudocode, or (if `description`
+    is given) from a plain-English statement of the algorithm."""
+    return Problem(algo, "draw", description=description)
 
 
 def OUTPUTS(algo: Algorithm, cases: list, followup: str = "") -> Problem:

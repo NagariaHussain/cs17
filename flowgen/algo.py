@@ -111,8 +111,12 @@ def run(algo: Algorithm, inputs: dict, *, step_limit: int = 2000):
       columns : ordered variable names (by first assignment) — table columns
       rows    : list of (env_snapshot, output_this_step_or_None)
       outputs : list of all printed values, in order
+
+    An input value may be a list: each `read` of that variable consumes the
+    next value (for reads inside a loop, e.g. the marks of n students).
     """
     env: dict = {}
+    queues = {k: list(v) for k, v in inputs.items() if isinstance(v, list)}
     cols: list[str] = []
     rows: list[tuple[dict, object]] = []
     outputs: list = []
@@ -134,7 +138,7 @@ def run(algo: Algorithm, inputs: dict, *, step_limit: int = 2000):
             if steps[0] > step_limit:
                 raise RuntimeError("step limit exceeded — runaway loop?")
             if isinstance(s, Input):
-                env[s.var] = inputs[s.var]
+                env[s.var] = queues[s.var].pop(0) if s.var in queues else inputs[s.var]
                 track(s.var)
                 snap()
             elif isinstance(s, Assign):

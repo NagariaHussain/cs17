@@ -61,6 +61,26 @@ count_digits = Algorithm("Count of digits", [
     out("count"),
 ])
 
+fizzbuzz_lite = Algorithm("FizzBuzz (lite)", [
+    read("n"),
+    assign("i", "1"),
+    While("i <= n", [
+        If("i % 3 == 0", [out('"buzz"')], [out("i")]),
+        assign("i", "i + 1"),
+    ]),
+])
+
+grades = Algorithm("Grades of n students", [
+    read("n"),
+    assign("i", "1"),
+    While("i <= n", [
+        read("marks"),
+        If("marks >= 80", [out('"A"')],
+           [If("marks >= 50", [out('"B"')], [out('"C"')])]),
+        assign("i", "i + 1"),
+    ]),
+])
+
 PROBLEMS = [
     OUTPUTS(absolute, [{"n": 7}, {"n": -4}, {"n": 0}, {"n": -19}],
             followup="Can you tell what this algorithm is doing?"),
@@ -70,4 +90,9 @@ PROBLEMS = [
     TRACE(count_digits, {"n": 472},
           note="Note: n // 10 means whole-number division — divide and drop the "
                "remainder. For example, 472 // 10 = 47 (not 47.2)."),
+    DRAW(fizzbuzz_lite,
+         description="Ask the user for a number n. Then go through the numbers "
+                     "1, 2, 3, … up to n, one by one: if a number is divisible "
+                     "by 3, print “buzz”; otherwise print the number itself."),
+    TRACE(grades, {"n": 3, "marks": [55, 82, 40]}),
 ]

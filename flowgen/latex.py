@@ -55,8 +55,17 @@ def _trace_table(cols, rows, *, fill: bool) -> str:
     return "\n".join(out)
 
 
-def _inputs_str(inputs: dict) -> str:
-    return ", ".join(f"{k} = {v}" for k, v in inputs.items())
+def _trace_instruction(inputs: dict) -> str:
+    """E.g. 'Trace this algorithm for $n = 3$, where the values of $marks$
+    entered are 55, 82, 40 (in that order), and complete the trace table.'"""
+    scalars = {k: v for k, v in inputs.items() if not isinstance(v, list)}
+    queues = {k: v for k, v in inputs.items() if isinstance(v, list)}
+    text = r"Trace this algorithm for $%s$" % _esc(
+        ", ".join(f"{k} = {v}" for k, v in scalars.items()))
+    for k, vals in queues.items():
+        text += r", where the values of $%s$ entered are %s (in that order)" % (
+            _esc(k), _esc(", ".join(str(v) for v in vals)))
+    return text + ", and complete the trace table."
 
 
 def _outputs_table(algo: Algorithm, cases, *, fill: bool) -> str:
@@ -89,13 +98,15 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
             parts.append(_fig(fig_path))
         else:
             parts.append(r"Draw a flowchart for this algorithm:")
-            parts.append(_pseudocode(algo))
+            if problem.description:  # plain English instead of pseudocode
+                parts.append(r"\begin{quote}\itshape %s\end{quote}" % _esc(problem.description))
+            else:
+                parts.append(_pseudocode(algo))
             parts.append(r"\vspace{120pt}\par")
 
     elif problem.kind == "trace":
         cols, rows, outputs = run(algo, problem.inputs)
-        parts.append(r"Trace this algorithm for $%s$, and complete the trace table."
-                     % _esc(_inputs_str(problem.inputs)))
+        parts.append(_trace_instruction(problem.inputs))
         if problem.note:
             parts.append(r"\par\vspace{2pt}\textit{%s}" % _esc(problem.note))
         parts.append(r"\par\vspace{8pt}")
@@ -130,7 +141,7 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
 
 
 def _section(rendered, *, title, answer_key):
-    out = [r"\section*{%s}" % title]
+    out = [r"\wstitle{%s}" % title]
     if answer_key:
         out.append(r"\textit{Answer key}\par\vspace{8pt}")
     for i, (problem, fig) in enumerate(rendered, 1):

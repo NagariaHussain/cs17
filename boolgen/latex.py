@@ -66,8 +66,6 @@ def truth_table_latex(e: Expr, *, fill: bool, out: str = "Y") -> str:
 
 _PREAMBLE = wsbase.preamble(r"""\usepackage{amsmath}
 \usepackage{enumitem}
-\usepackage{titlesec}
-\titleformat{\section}{\large\bfseries}{}{0pt}{}
 """)
 
 
@@ -118,7 +116,7 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
 
 def _section(rendered, *, title, answer_key):
     """rendered: list of (Problem, fig_path | None)."""
-    out = [r"\section*{%s}" % title]
+    out = [r"\wstitle{%s}" % title]
     if answer_key:
         out.append(r"\textit{Answer key}\par\vspace{8pt}")
     else:
