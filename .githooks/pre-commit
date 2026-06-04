@@ -1,0 +1,21 @@
+#!/bin/sh
+# Rebuild worksheet PDFs when their sources are staged, and stage the outputs.
+# Sources: the worksheet modules and the generator packages (the .tex files in
+# build/ are themselves generated from these, so they are the real triggers).
+set -e
+
+staged=$(git diff --cached --name-only)
+
+if echo "$staged" | grep -qE '^(boolgen/|worksheet\.py$)'; then
+    echo "pre-commit: boolgen sources changed -> rebuilding boolean worksheet PDFs"
+    make boolean
+    git add build/worksheet
+fi
+
+if echo "$staged" | grep -qE '^(flowgen/|flowchart_worksheet\.py$)'; then
+    echo "pre-commit: flowgen sources changed -> rebuilding flowchart worksheet PDFs"
+    make flowchart
+    git add build/flowchart_worksheet
+fi
+
+exit 0

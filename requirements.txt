@@ -1,0 +1,4 @@
+schemdraw>=0.23
+matplotlib>=3.10
+sympy>=1.14
+graphviz>=0.21      # flowcharts (also needs the `dot` binary: brew install graphviz)
