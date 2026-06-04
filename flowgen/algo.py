@@ -65,6 +65,20 @@ class Algorithm:
     body: list
 
 
+# ---- display -----------------------------------------------------------------
+
+# Students haven't been taught == / != yet: translate them to English wherever
+# an expression is SHOWN (pseudocode, flowchart labels). The original string is
+# still what the tracer executes, so the trace can never disagree.
+_DISPLAY = ((" != ", " is not "), (" == ", " is "))
+
+
+def display_expr(s: str) -> str:
+    for op, english in _DISPLAY:
+        s = s.replace(op, english)
+    return s
+
+
 # ---- pseudocode --------------------------------------------------------------
 
 def pseudocode_lines(algo: Algorithm) -> list[tuple[int, str]]:
@@ -76,17 +90,17 @@ def pseudocode_lines(algo: Algorithm) -> list[tuple[int, str]]:
             if isinstance(s, Input):
                 lines.append((lvl, f"read {s.var}"))
             elif isinstance(s, Assign):
-                lines.append((lvl, f"{s.var} = {s.expr}"))
+                lines.append((lvl, f"{s.var} = {display_expr(s.expr)}"))
             elif isinstance(s, Output):
-                lines.append((lvl, f"print {s.expr}"))
+                lines.append((lvl, f"print {display_expr(s.expr)}"))
             elif isinstance(s, If):
-                lines.append((lvl, f"if {s.cond}:"))
+                lines.append((lvl, f"if {display_expr(s.cond)}:"))
                 emit(s.then, lvl + 1)
                 if s.els:
                     lines.append((lvl, "else:"))
                     emit(s.els, lvl + 1)
             elif isinstance(s, While):
-                lines.append((lvl, f"while {s.cond}:"))
+                lines.append((lvl, f"while {display_expr(s.cond)}:"))
                 emit(s.body, lvl + 1)
             else:
                 raise AssertionError(s)

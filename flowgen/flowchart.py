@@ -15,7 +15,7 @@ import itertools
 
 import graphviz
 
-from .algo import Algorithm, Assign, If, Input, Output, While
+from .algo import Algorithm, Assign, If, Input, Output, While, display_expr
 
 
 def _build_dot(algo: Algorithm) -> graphviz.Digraph:
@@ -45,21 +45,21 @@ def _build_dot(algo: Algorithm) -> graphviz.Digraph:
             link(prev_exits, n)
             return [(n, None)]
         if isinstance(s, Assign):
-            n = node("box", f"{s.var} = {s.expr}")
+            n = node("box", f"{s.var} = {display_expr(s.expr)}")
             link(prev_exits, n)
             return [(n, None)]
         if isinstance(s, Output):
-            n = node("parallelogram", f"print {s.expr}")
+            n = node("parallelogram", f"print {display_expr(s.expr)}")
             link(prev_exits, n)
             return [(n, None)]
         if isinstance(s, If):
-            d = node("diamond", s.cond)
+            d = node("diamond", display_expr(s.cond))
             link(prev_exits, d)
             then_exits = seq(s.then, [(d, "Yes")])
             else_exits = seq(s.els, [(d, "No")]) if s.els else [(d, "No")]
             return then_exits + else_exits
         if isinstance(s, While):
-            d = node("diamond", s.cond)
+            d = node("diamond", display_expr(s.cond))
             link(prev_exits, d)
             body_exits = seq(s.body, [(d, "Yes")])
             link(body_exits, d)  # loop back to the test

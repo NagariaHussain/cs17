@@ -65,8 +65,8 @@
 <!-- n5 -->
 <g id="node6" class="node">
 <title>n5</title>
-<polygon fill="none" stroke="black" points="221.26,-388.5 165.86,-370.5 221.26,-352.5 276.66,-370.5 221.26,-388.5"/>
-<text xml:space="preserve" text-anchor="middle" x="221.26" y="-366.05" font-family="Helvetica,sans-Serif" font-size="11.00">marks != &#45;1</text>
+<polygon fill="none" stroke="black" points="221.26,-388.5 152.7,-370.5 221.26,-352.5 289.82,-370.5 221.26,-388.5"/>
+<text xml:space="preserve" text-anchor="middle" x="221.26" y="-366.05" font-family="Helvetica,sans-Serif" font-size="11.00">marks is not &#45;1</text>
 </g>
 <!-- n4&#45;&gt;n5 -->
 <g id="edge5" class="edge">
@@ -83,8 +83,8 @@
 <!-- n5&#45;&gt;n6 -->
 <g id="edge6" class="edge">
 <title>n5&#45;&gt;n6</title>
-<path fill="none" stroke="black" d="M201.49,-358.62C181.76,-347.76 150.92,-330.79 126.25,-317.21"/>
-<polygon fill="black" stroke="black" points="127.46,-315.08 120.14,-313.85 125.09,-319.37 127.46,-315.08"/>
+<path fill="none" stroke="black" d="M199.73,-357.65C179.95,-346.77 150.16,-330.37 126.21,-317.19"/>
+<polygon fill="black" stroke="black" points="127.62,-315.17 120.31,-313.94 125.26,-319.46 127.62,-315.17"/>
 <text xml:space="preserve" text-anchor="middle" x="169.41" y="-328.95" font-family="Helvetica,sans-Serif" font-size="9.00">Yes</text>
 </g>
 <!-- n11 -->
@@ -159,8 +159,8 @@
 <!-- n10&#45;&gt;n5 -->
 <g id="edge12" class="edge">
 <title>n10&#45;&gt;n5</title>
-<path fill="none" stroke="black" d="M211.74,-27.51C264.32,-37.7 338.26,-56.86 338.26,-84 338.26,-295.75 338.26,-295.75 338.26,-295.75 338.26,-332.32 296.85,-351.48 263.31,-361"/>
-<polygon fill="black" stroke="black" points="263.01,-358.54 256.88,-362.72 264.27,-363.28 263.01,-358.54"/>
+<path fill="none" stroke="black" d="M211.74,-27.51C264.32,-37.7 338.26,-56.86 338.26,-84 338.26,-295.75 338.26,-295.75 338.26,-295.75 338.26,-330.83 300.14,-349.89 267.42,-359.79"/>
+<polygon fill="black" stroke="black" points="266.77,-357.43 260.7,-361.7 268.11,-362.15 266.77,-357.43"/>
 </g>
 <!-- n12 -->
 <g id="node13" class="node">
