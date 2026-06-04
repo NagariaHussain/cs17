@@ -33,8 +33,9 @@ _BASE = r"""\documentclass[11pt]{article}
 \newfontfamily\brandfont{Geist Mono}  % needs the Geist Mono family installed
 \newcommand{\probrule}{\par\vspace{4pt}\textcolor{gray!50}{\hrulefill}\par\vspace{10pt}}
 % branded worksheet heading: CS17 left, worksheet title right, rule underneath
+\definecolor{brand}{HTML}{888888}
 \newcommand{\wstitle}[1]{%
-  \noindent{\LARGE\brandfont\bfseries CS17}\hfill{\Large #1}\par
+  \noindent{\LARGE\brandfont\bfseries\color{brand}CS17}\hfill{\Large #1}\par
   \vspace{5pt}{\color{black}\hrule height 0.8pt}\par\vspace{18pt}}
 """
 
