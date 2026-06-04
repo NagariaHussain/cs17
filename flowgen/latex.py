@@ -86,9 +86,23 @@ def _outputs_table(algo: Algorithm, cases, *, fill: bool) -> str:
     return "\n".join(out)
 
 
+def _fig_beside_trace(fig_path, cols, rows, *, fill: bool) -> list:
+    """Flowchart and trace table side by side (both are tall and narrow)."""
+    return [
+        r"\par\vspace{8pt}",
+        r"\begin{minipage}[c]{0.46\linewidth}",
+        r"\includegraphics[max width=\linewidth,"
+        r"max totalheight=0.7\textheight]{%s}" % fig_path,
+        r"\end{minipage}\hfill",
+        r"\begin{minipage}[c]{0.5\linewidth}\centering",
+        _trace_table(cols, rows, fill=fill),
+        r"\end{minipage}",
+    ]
+
+
 def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
     parts = []
-    if problem.kind == "trace":
+    if problem.kind == "trace" or (problem.kind == "outputs" and problem.inputs):
         # heading + flowchart/table block must stay together
         parts.append(r"\Needspace*{0.78\textheight}")
     parts.append(r"\subsection*{Problem %d.}" % idx)
@@ -112,30 +126,33 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
         parts.append(_trace_instruction(problem.inputs))
         if problem.note:
             parts.append(r"\par\vspace{2pt}\textit{%s}" % _esc(problem.note))
-        parts.append(r"\par\vspace{8pt}")
-        # flowchart and trace table side by side (both are tall and narrow)
-        parts.append(r"\begin{minipage}[c]{0.46\linewidth}")
-        parts.append(r"\includegraphics[max width=\linewidth,"
-                     r"max totalheight=0.7\textheight]{%s}" % fig_path)
-        parts.append(r"\end{minipage}\hfill")
-        parts.append(r"\begin{minipage}[c]{0.5\linewidth}\centering")
-        parts.append(_trace_table(cols, rows, fill=answer))
-        parts.append(r"\end{minipage}")
+        parts += _fig_beside_trace(fig_path, cols, rows, fill=answer)
         if answer:
             shown = ", ".join(_esc(o) for o in outputs)
             parts.append(r"\textbf{Output:}\quad %s" % (shown or r"\textit{(none)}"))
 
     elif problem.kind == "outputs":
-        parts.append(_fig(fig_path))
-        label = r"(i)~" if problem.followup else ""
-        parts.append(label + r"For each input below, follow the flowchart and write the output.")
-        if problem.note:
+        has_trace = bool(problem.inputs)
+        n_parts = 1 + has_trace + bool(problem.followup)
+        labels = iter([r"(i)~", r"(ii)~", r"(iii)~"] if n_parts > 1 else ["", "", ""])
+        if has_trace:  # warm-up: trace one input, flowchart beside the table
+            cols, rows, _ = run(algo, problem.inputs)
+            parts.append(next(labels) + _trace_instruction(problem.inputs))
+            if problem.note:
+                parts.append(r"\par\vspace{2pt}\textit{%s}" % _esc(problem.note))
+            parts += _fig_beside_trace(fig_path, cols, rows, fill=answer)
+            parts.append(r"\par\vspace{8pt}")
+        else:
+            parts.append(_fig(fig_path))
+        parts.append(next(labels)
+                     + r"For each input below, follow the flowchart and write the output.")
+        if problem.note and not has_trace:
             parts.append(r"\par\vspace{2pt}\textit{%s}" % _esc(problem.note))
         parts.append(r"\par\vspace{4pt}")
         parts.append(r"\begin{center}" + _outputs_table(algo, problem.cases, fill=answer)
                      + r"\end{center}")
         if problem.followup:
-            parts.append(r"(ii)~" + _esc(problem.followup))
+            parts.append(next(labels) + _esc(problem.followup))
             if answer:
                 # the algorithm's title is the single-source answer to "what does it do?"
                 parts.append(r"\par\vspace{4pt}\textbf{Answer:}\quad %s" % _esc(algo.title))

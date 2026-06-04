@@ -134,12 +134,13 @@ PROBLEMS = [
             note="Note: n % 10 gives the remainder after dividing by 10 — the "
                  "last digit of n. For example, 472 % 10 = 2."),
     OUTPUTS(halving, [{"n": 8}, {"n": 16}, {"n": 100}, {"n": 1000}],
+            trace={"n": 16},
             followup="n grew from 8 all the way to 1000 — but look how little "
                      "the output grew! Can you explain why?"),
     TRACE(till_total, {"amount": [120, 75, 200, 0]},
-          description="A shopkeeper adds up the money received from each "
-                      "customer at the end of the day. She enters the amounts "
-                      "one by one, and enters 0 to say “no more” — the till "
+          description="At the end of the day, a shopkeeper adds up the money "
+                      "received from each customer. She enters the amounts one "
+                      "by one, and enters 0 when there are no more. The program "
                       "then shows the total. Notice that the algorithm cannot "
                       "know in advance how many customers there were!"),
 ]

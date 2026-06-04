@@ -40,5 +40,9 @@ def DRAW(algo: Algorithm, description: str = "") -> Problem:
     return Problem(algo, "draw", description=description)
 
 
-def OUTPUTS(algo: Algorithm, cases: list, followup: str = "", note: str = "") -> Problem:
-    return Problem(algo, "outputs", cases=cases, followup=followup, note=note)
+def OUTPUTS(algo: Algorithm, cases: list, followup: str = "", note: str = "",
+            trace: dict | None = None) -> Problem:
+    """Find the output for each input case. `trace` adds a warm-up part: trace
+    the algorithm (with a trace table) for that one input first."""
+    return Problem(algo, "outputs", inputs=trace or {}, cases=cases,
+                   followup=followup, note=note)
