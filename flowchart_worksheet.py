@@ -40,9 +40,32 @@ sum_even = Algorithm("Sum of even numbers 1..n", [
     out("sum"),
 ])
 
+count_multiples = Algorithm("Count of multiples of 3", [
+    read("n"),
+    assign("count", "0"),
+    assign("i", "1"),
+    While("i <= n", [
+        If("i % 3 == 0", [assign("count", "count + 1")]),
+        assign("i", "i + 1"),
+    ]),
+    out("count"),
+])
+
+count_digits = Algorithm("Count of digits", [
+    read("n"),
+    assign("count", "0"),
+    While("n > 0", [
+        assign("count", "count + 1"),
+        assign("n", "n // 10"),
+    ]),
+    out("count"),
+])
+
 PROBLEMS = [
     OUTPUTS(absolute, [{"n": 7}, {"n": -4}, {"n": 0}, {"n": -19}],
             followup="Can you tell what this algorithm is doing?"),
     TRACE(sum_1_to_n, {"n": 4}),
     TRACE(sum_even, {"n": 5}),
+    TRACE(count_multiples, {"n": 7}),
+    TRACE(count_digits, {"n": 472}),
 ]
