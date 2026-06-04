@@ -12,6 +12,12 @@ _PREAMBLE = r"""\documentclass[11pt]{article}
 \usepackage{listings}
 \usepackage[table]{xcolor}
 \usepackage{needspace}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\small\textcolor{gray}{cs17.org}}
+\fancyfoot[C]{\thepage}
 \lstset{basicstyle=\ttfamily\small, frame=single, framesep=4pt, xleftmargin=4pt,
         columns=fullflexible, keepspaces=true, aboveskip=2pt, belowskip=2pt}
 \setlength{\parindent}{0pt}

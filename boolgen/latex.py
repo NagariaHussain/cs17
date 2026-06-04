@@ -71,6 +71,12 @@ _PREAMBLE = r"""\documentclass[11pt]{article}
 \usepackage{enumitem}
 \usepackage{titlesec}
 \usepackage{xcolor}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\small\textcolor{gray}{cs17.org}}
+\fancyfoot[C]{\thepage}
 \setlength{\parindent}{0pt}
 \titleformat{\section}{\large\bfseries}{}{0pt}{}
 \newcommand{\probrule}{\par\vspace{4pt}\textcolor{gray!50}{\hrulefill}\par\vspace{8pt}}
