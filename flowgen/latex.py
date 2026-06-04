@@ -102,6 +102,8 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
         cols, rows, outputs = run(algo, problem.inputs)
         parts.append(r"Trace this algorithm for $%s$, and complete the trace table."
                      % _esc(_inputs_str(problem.inputs)))
+        if problem.note:
+            parts.append(r"\par\vspace{2pt}\textit{%s}" % _esc(problem.note))
         parts.append(r"\par\vspace{8pt}")
         # flowchart and trace table side by side (both are tall and narrow)
         parts.append(r"\begin{minipage}[c]{0.46\linewidth}")

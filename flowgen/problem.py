@@ -21,13 +21,14 @@ class Problem:
     inputs: dict = field(default_factory=dict)
     cases: list = field(default_factory=list)  # for "outputs": list of input dicts
     followup: str = ""  # open-ended part (ii); answer key shows algo.title
+    note: str = ""      # in-question hint (e.g. explain notation not yet taught)
 
     def __post_init__(self):
         assert self.kind in KINDS, f"unknown kind {self.kind!r}"
 
 
-def TRACE(algo: Algorithm, inputs: dict) -> Problem:
-    return Problem(algo, "trace", inputs)
+def TRACE(algo: Algorithm, inputs: dict, note: str = "") -> Problem:
+    return Problem(algo, "trace", inputs, note=note)
 
 
 def DRAW(algo: Algorithm) -> Problem:
