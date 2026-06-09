@@ -2,21 +2,29 @@
 # Rebuild worksheet PDFs when their sources are staged, and stage the outputs.
 # Sources: the worksheet modules and the generator packages (the .tex files in
 # build/ are themselves generated from these, so they are the real triggers).
+#
+# Dependencies to keep in mind: wsbase.py is shared by every sheet; and the
+# binary/hex sheets (Worksheets 3 & 4) embed boolgen/flowgen revision questions,
+# so a change to boolgen/ or flowgen/ must rebuild those sheets too.
 set -e
 
 staged=$(git diff --cached --name-only)
+match() { echo "$staged" | grep -qE "$1"; }
 
-# wsbase.py is shared setup (footer, preamble, tectonic) -> rebuild everything
-if echo "$staged" | grep -qE '^(boolgen/|worksheet\.py$|wsbase\.py$)'; then
-    echo "pre-commit: boolgen sources changed -> rebuilding boolean worksheet PDFs"
-    make boolean
-    git add build/worksheet
-fi
+bld_boolean=false; bld_flow=false; bld_binary=false; bld_hex=false
 
-if echo "$staged" | grep -qE '^(flowgen/|flowchart_worksheet\.py$|wsbase\.py$)'; then
-    echo "pre-commit: flowgen sources changed -> rebuilding flowchart worksheet PDFs"
-    make flowchart
-    git add build/flowchart_worksheet
-fi
+match '^wsbase\.py$'    && { bld_boolean=true; bld_flow=true; bld_binary=true; bld_hex=true; }
+match '^boolgen/'       && { bld_boolean=true; bld_binary=true; bld_hex=true; }
+match '^flowgen/'       && { bld_flow=true;    bld_binary=true; bld_hex=true; }
+match '^bingen/'        && { bld_binary=true;  bld_hex=true; }
+match '^boolean_worksheet\.py$'   && bld_boolean=true
+match '^flowchart_worksheet\.py$' && bld_flow=true
+match '^binary_worksheet\.py$'    && bld_binary=true
+match '^hex_worksheet\.py$'       && bld_hex=true
+
+$bld_boolean && { echo "pre-commit: rebuilding boolean worksheet";   make boolean;   git add build/boolean_worksheet; }
+$bld_flow    && { echo "pre-commit: rebuilding flowchart worksheet"; make flowchart; git add build/flowchart_worksheet; }
+$bld_binary  && { echo "pre-commit: rebuilding binary worksheet";    make binary;    git add build/binary_worksheet; }
+$bld_hex     && { echo "pre-commit: rebuilding hex worksheet";       make hex;       git add build/hex_worksheet; }
 
 exit 0
