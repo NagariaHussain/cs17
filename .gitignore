@@ -2,7 +2,7 @@
 __pycache__/
 *.pyc
 .DS_Store
-# build/: PDFs and figure images are checked in; LaTeX intermediates are not
-build/**/*.tex
-build/**/*.aux
-build/**/*.log
+# worksheets/*/build/: PDFs and figure images are checked in; LaTeX intermediates are not
+worksheets/**/build/**/*.tex
+worksheets/**/build/**/*.aux
+worksheets/**/build/**/*.log
