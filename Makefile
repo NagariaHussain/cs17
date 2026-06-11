@@ -5,11 +5,12 @@ WS1 := worksheets/worksheet1_boolean_algebra
 WS2 := worksheets/worksheet2_flowcharts
 WS3 := worksheets/worksheet3_binary
 WS4 := worksheets/worksheet4_hexadecimal
+WS5 := worksheets/worksheet5_sevensegment
 
-.PHONY: all boolean flowchart binary hex setup clean
+.PHONY: all boolean flowchart binary hex sevenseg setup clean
 
 # Build every worksheet  ->  make
-all: boolean flowchart binary hex
+all: boolean flowchart binary hex sevenseg
 
 boolean:
 	$(PY) -m gens.boolgen.build $(WS1)/boolean_worksheet.py --out $(WS1)/build
@@ -22,6 +23,9 @@ binary:
 
 hex:
 	$(PY) -m gens.bingen.build $(WS4)/hex_worksheet.py --out $(WS4)/build
+
+sevenseg:
+	$(PY) -m gens.segen.build $(WS5)/sevenseg_worksheet.py --out $(WS5)/build
 
 setup:
 	python3 -m venv $(VENV)
