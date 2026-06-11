@@ -24,6 +24,7 @@ assignments/
 | Folder | Topic | Wiki slug |
 |--------|-------|-----------|
 | [`q1-p2_jugaad_inventory`](q1-p2_jugaad_inventory/) | Spreadsheet inventory: VLOOKUP / SUMIFS / IFS / conditional formatting / dashboard | `q1-p2` |
+| [`q1-p3_jugaad_sales`](q1-p3_jugaad_sales/) | Spreadsheet sales analysis: XLOOKUP / charts (continues Q1-P2) | `q1-p3` |
 
 ## Adding a new assignment
 
