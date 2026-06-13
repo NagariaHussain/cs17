@@ -16,6 +16,8 @@ _PREAMBLE = wsbase.preamble(r"""\usepackage{listings}
 def _esc(v) -> str:
     if v is None:
         return ""
+    if isinstance(v, float) and v.is_integer():
+        v = int(v)  # show 7500, not 7500.0 (a whole-rupee result of *0.05 etc.)
     s = str(v)
     for a, b in [("\\", r"\textbackslash{}"), ("&", r"\&"), ("%", r"\%"),
                  ("#", r"\#"), ("_", r"\_"), ("{", r"\{"), ("}", r"\}")]:
@@ -105,19 +107,42 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
     if problem.kind == "trace" or (problem.kind == "outputs" and problem.inputs):
         # heading + flowchart/table block must stay together
         parts.append(r"\Needspace*{0.78\textheight}")
+    elif problem.kind == "draw" and problem.cases:
+        # statement + worked example + predict table should not split
+        parts.append(r"\Needspace*{0.5\textheight}")
     parts.append(r"\subsection*{Problem %d.}" % idx)
     algo = problem.algo
 
     if problem.kind == "draw":
-        if answer:
-            parts.append(_fig(fig_path))
-        else:
-            parts.append(r"Draw a flowchart for this algorithm:")
+        predict = problem.cases  # inputs to predict the output for, before drawing
+        if not answer:
+            # the statement comes first — it's needed for both parts
             if problem.description:  # plain English instead of pseudocode
                 parts.append(r"\begin{quote}\itshape %s\end{quote}" % _esc(problem.description))
             else:
                 parts.append(_pseudocode(algo))
+            if predict:
+                parts.append(
+                    r"\textbf{(i)}~Before drawing anything, work out by hand what "
+                    r"the program should print for each input below. (Once you "
+                    r"have drawn your flowchart, trace it on these same inputs and "
+                    r"check that it agrees with your answers here.)")
+                if problem.example:
+                    parts.append(r"\par\vspace{2pt}\textit{Worked example: %s}"
+                                 % _esc(problem.example))
+                parts.append(r"\par\vspace{4pt}\begin{center}"
+                             + _outputs_table(algo, predict, fill=False) + r"\end{center}")
+                parts.append(r"\textbf{(ii)}~Now draw a flowchart for the algorithm.")
+            else:
+                parts.append(r"Draw a flowchart for this algorithm:")
             parts.append(r"\vspace{120pt}\par")
+        else:
+            if predict:
+                parts.append(r"\textbf{(i)}~Expected output for each input:"
+                             r"\par\vspace{4pt}\begin{center}"
+                             + _outputs_table(algo, predict, fill=True) + r"\end{center}")
+                parts.append(r"\textbf{(ii)}~Flowchart:\par")
+            parts.append(_fig(fig_path))
 
     elif problem.kind == "trace":
         cols, rows, outputs = run(algo, problem.inputs)
