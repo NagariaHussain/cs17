@@ -17,10 +17,10 @@ match '^gens/wsbase\.py$'  && { bld_boolean=true; bld_flow=true; bld_binary=true
 match '^gens/boolgen/'     && { bld_boolean=true; bld_binary=true; bld_hex=true; }
 match '^gens/flowgen/'     && { bld_flow=true;    bld_binary=true; bld_hex=true; }
 match '^gens/bingen/'      && { bld_binary=true;  bld_hex=true; }
-match '/worksheet_one_boolean_algebra\.py$' && bld_boolean=true
-match '/worksheet_two_flowcharts\.py$'      && bld_flow=true
-match '/worksheet_three_binary\.py$'        && bld_binary=true
-match '/worksheet_four_hexadecimal\.py$'    && bld_hex=true
+match '/worksheet_1_boolean_algebra\.py$' && bld_boolean=true
+match '/worksheet_2_flowcharts\.py$'      && bld_flow=true
+match '/worksheet_3_binary\.py$'        && bld_binary=true
+match '/worksheet_4_hexadecimal\.py$'    && bld_hex=true
 
 WS1=worksheets/worksheet1_boolean_algebra
 WS2=worksheets/worksheet2_flowcharts

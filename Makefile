@@ -15,36 +15,41 @@ WS7 := worksheets/worksheet7_loops
 all: boolean flowchart binary hex sevenseg decisions loops pdfs
 
 boolean:
-	$(PY) -m gens.boolgen.build $(WS1)/worksheet_one_boolean_algebra.py --out $(WS1)/build
+	$(PY) -m gens.boolgen.build $(WS1)/worksheet_1_boolean_algebra.py --out $(WS1)/build
 
 flowchart:
-	$(PY) -m gens.flowgen.build $(WS2)/worksheet_two_flowcharts.py --out $(WS2)/build
+	$(PY) -m gens.flowgen.build $(WS2)/worksheet_2_flowcharts.py --out $(WS2)/build
 
 binary:
-	$(PY) -m gens.bingen.build $(WS3)/worksheet_three_binary.py --out $(WS3)/build
+	$(PY) -m gens.bingen.build $(WS3)/worksheet_3_binary.py --out $(WS3)/build
 
 hex:
-	$(PY) -m gens.bingen.build $(WS4)/worksheet_four_hexadecimal.py --out $(WS4)/build
+	$(PY) -m gens.bingen.build $(WS4)/worksheet_4_hexadecimal.py --out $(WS4)/build
 
 sevenseg:
-	$(PY) -m gens.segen.build $(WS5)/worksheet_five_seven_segment_display.py --out $(WS5)/build
+	$(PY) -m gens.segen.build $(WS5)/worksheet_5_seven_segment_display.py --out $(WS5)/build
 
 decisions:
-	$(PY) -m gens.flowgen.build $(WS6)/worksheet_six_decisions_and_calculations.py --out $(WS6)/build
+	$(PY) -m gens.flowgen.build $(WS6)/worksheet_6_decisions_and_calculations.py --out $(WS6)/build
 
 loops:
-	$(PY) -m gens.flowgen.build $(WS7)/worksheet_seven_simple_loops.py --out $(WS7)/build
+	$(PY) -m gens.flowgen.build $(WS7)/worksheet_7_simple_loops.py --out $(WS7)/build
 
-# Gather every worksheet + answer-key PDF into a single pdfs/ folder as symlinks,
-# so all worksheets can be browsed from one place (build/ holds figures + .tex).
+# Gather every PDF into pdfs/ as symlinks (build/ holds figures + .tex), split
+# into pdfs/sheets/ (the worksheets) and pdfs/answer_keys/ (the -answers PDFs)
+# so all worksheets can be browsed from one place.
 pdfs:
-	@mkdir -p pdfs
-	@rm -f pdfs/*.pdf
+	@mkdir -p pdfs/sheets pdfs/answer_keys
+	@rm -f pdfs/sheets/*.pdf pdfs/answer_keys/*.pdf
 	@for f in worksheets/worksheet*/build/*/*.pdf; do \
 	  [ -e "$$f" ] || continue; \
-	  ln -sf "../$$f" "pdfs/$$(basename "$$f")"; \
+	  case "$$f" in \
+	    *-answers.pdf) ln -sf "../../$$f" "pdfs/answer_keys/$$(basename "$$f")" ;; \
+	    *)             ln -sf "../../$$f" "pdfs/sheets/$$(basename "$$f")" ;; \
+	  esac; \
 	done
-	@echo "pdfs/ updated:"; ls -1 pdfs
+	@echo "pdfs/sheets:";      ls -1 pdfs/sheets
+	@echo "pdfs/answer_keys:"; ls -1 pdfs/answer_keys
 
 setup:
 	python3 -m venv $(VENV)
