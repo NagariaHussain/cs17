@@ -7,11 +7,12 @@ WS3 := worksheets/worksheet3_binary
 WS4 := worksheets/worksheet4_hexadecimal
 WS5 := worksheets/worksheet5_sevensegment
 WS6 := worksheets/worksheet6_decisions
+WS7 := worksheets/worksheet7_loops
 
-.PHONY: all boolean flowchart binary hex sevenseg decisions setup clean
+.PHONY: all boolean flowchart binary hex sevenseg decisions loops setup clean
 
 # Build every worksheet  ->  make
-all: boolean flowchart binary hex sevenseg decisions
+all: boolean flowchart binary hex sevenseg decisions loops
 
 boolean:
 	$(PY) -m gens.boolgen.build $(WS1)/boolean_worksheet.py --out $(WS1)/build
@@ -30,6 +31,9 @@ sevenseg:
 
 decisions:
 	$(PY) -m gens.flowgen.build $(WS6)/decisions_worksheet.py --out $(WS6)/build
+
+loops:
+	$(PY) -m gens.flowgen.build $(WS7)/loops_worksheet.py --out $(WS7)/build
 
 setup:
 	python3 -m venv $(VENV)
