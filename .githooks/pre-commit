@@ -17,19 +17,23 @@ match '^gens/wsbase\.py$'  && { bld_boolean=true; bld_flow=true; bld_binary=true
 match '^gens/boolgen/'     && { bld_boolean=true; bld_binary=true; bld_hex=true; }
 match '^gens/flowgen/'     && { bld_flow=true;    bld_binary=true; bld_hex=true; }
 match '^gens/bingen/'      && { bld_binary=true;  bld_hex=true; }
-match '/boolean_worksheet\.py$'   && bld_boolean=true
-match '/flowchart_worksheet\.py$' && bld_flow=true
-match '/binary_worksheet\.py$'    && bld_binary=true
-match '/hex_worksheet\.py$'       && bld_hex=true
+match '/worksheet_one_boolean_algebra\.py$' && bld_boolean=true
+match '/worksheet_two_flowcharts\.py$'      && bld_flow=true
+match '/worksheet_three_binary\.py$'        && bld_binary=true
+match '/worksheet_four_hexadecimal\.py$'    && bld_hex=true
 
 WS1=worksheets/worksheet1_boolean_algebra
 WS2=worksheets/worksheet2_flowcharts
 WS3=worksheets/worksheet3_binary
 WS4=worksheets/worksheet4_hexadecimal
 
-$bld_boolean && { echo "pre-commit: rebuilding boolean worksheet";   make boolean;   git add "$WS1/build"; }
-$bld_flow    && { echo "pre-commit: rebuilding flowchart worksheet"; make flowchart; git add "$WS2/build"; }
-$bld_binary  && { echo "pre-commit: rebuilding binary worksheet";    make binary;    git add "$WS3/build"; }
-$bld_hex     && { echo "pre-commit: rebuilding hex worksheet";       make hex;       git add "$WS4/build"; }
+rebuilt=false
+$bld_boolean && { echo "pre-commit: rebuilding boolean worksheet";   make boolean;   git add "$WS1/build"; rebuilt=true; }
+$bld_flow    && { echo "pre-commit: rebuilding flowchart worksheet"; make flowchart; git add "$WS2/build"; rebuilt=true; }
+$bld_binary  && { echo "pre-commit: rebuilding binary worksheet";    make binary;    git add "$WS3/build"; rebuilt=true; }
+$bld_hex     && { echo "pre-commit: rebuilding hex worksheet";       make hex;       git add "$WS4/build"; rebuilt=true; }
+
+# Refresh the pdfs/ symlink farm whenever any sheet was rebuilt.
+$rebuilt && { make pdfs >/dev/null; git add pdfs; }
 
 exit 0

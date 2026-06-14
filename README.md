@@ -15,10 +15,14 @@ Source for **cs17.org** course materials. Two kinds of material live here:
 gens/                       shared worksheet-generator engine (the packages below)
   boolgen/  flowgen/  bingen/  wsbase.py
 worksheets/
-  worksheet1_boolean_algebra/   boolean_worksheet.py   + build/   (WS1)
-  worksheet2_flowcharts/        flowchart_worksheet.py + build/   (WS2)
-  worksheet3_binary/            binary_worksheet.py    + build/   (WS3)
-  worksheet4_hexadecimal/       hex_worksheet.py       + build/   (WS4)
+  worksheet1_boolean_algebra/   worksheet_one_boolean_algebra.py            + build/   (WS1)
+  worksheet2_flowcharts/        worksheet_two_flowcharts.py                 + build/   (WS2)
+  worksheet3_binary/            worksheet_three_binary.py                   + build/   (WS3)
+  worksheet4_hexadecimal/       worksheet_four_hexadecimal.py               + build/   (WS4)
+  worksheet5_sevensegment/      worksheet_five_seven_segment_display.py     + build/   (WS5)
+  worksheet6_decisions/         worksheet_six_decisions_and_calculations.py + build/   (WS6)
+  worksheet7_loops/             worksheet_seven_simple_loops.py             + build/   (WS7)
+pdfs/                           every worksheet + answer-key PDF, symlinked into one folder
 assignments/
   q1-p2_jugaad_inventory/       README + build_seed.py + references/
 ```
@@ -31,14 +35,16 @@ assignments/
 
 All share the same idea: author each problem **once** as a single source of
 truth, then derive every representation from it so they can't disagree. Build
-(each worksheet's PDFs land in its own `build/` folder):
+(each worksheet's PDFs land in its own `build/` folder, and `make` also collects
+every PDF into the single top-level `pdfs/` folder as symlinks for easy browsing):
 
 ```bash
-make            # all worksheets
+make            # all worksheets, then refresh pdfs/
 make boolean    # gens.boolgen -> worksheets/worksheet1_boolean_algebra/build/
 make flowchart  # gens.flowgen -> worksheets/worksheet2_flowcharts/build/
 make binary     # gens.bingen  -> worksheets/worksheet3_binary/build/        (Worksheet 3)
 make hex        # gens.bingen  -> worksheets/worksheet4_hexadecimal/build/   (Worksheet 4)
+make pdfs       # just rebuild the pdfs/ symlink folder from existing builds
 ```
 
 ---
@@ -59,10 +65,10 @@ Final layout is typeset with **LaTeX via [Tectonic](https://tectonic-typesetting
 (self-contained — auto-downloads any packages it needs; no MacTeX install).
 
 ```
-boolean_worksheet.py ──▶ gens.boolgen ──▶ worksheet1_boolean_algebra/build/boolean_worksheet/
+worksheet_one_boolean_algebra.py ──▶ gens.boolgen ──▶ worksheet1_boolean_algebra/build/worksheet_one_boolean_algebra/
                                    ├── figs/pNN.{pdf,png,svg}  ← reusable diagram images
-                                   ├── boolean_worksheet.pdf         ← questions
-                                   └── boolean_worksheet-answers.pdf ← answer key (separate)
+                                   ├── worksheet_one_boolean_algebra.pdf         ← questions
+                                   └── worksheet_one_boolean_algebra-answers.pdf ← answer key (separate)
 ```
 
 ## Three problem types
@@ -70,7 +76,7 @@ boolean_worksheet.py ──▶ gens.boolgen ──▶ worksheet1_boolean_algebra
 All authored from the same expression; the *type* picks which direction the
 student works:
 
-| In `boolean_worksheet.py`  | Student is given… | …and must produce            |
+| In `worksheet_one_boolean_algebra.py`  | Student is given… | …and must produce            |
 |----------------------------|-------------------|------------------------------|
 | `parse("...")`             | the gate diagram  | the expression + truth table |
 | `CIRCUIT(parse("..."))`    | the expression    | the logic-gate circuit       |
@@ -90,12 +96,12 @@ regenerated PDFs so the checked-in PDFs never drift from the sources.
 
 ## Authoring
 
-Edit `boolean_worksheet.py`:
+Edit `worksheet_one_boolean_algebra.py`:
 
 ```python
 from gens.boolgen import parse, CIRCUIT, TRUTHTABLE
 
-TITLE = "Boolean Algebra Worksheet"
+TITLE = "Worksheet 1: Boolean Algebra"
 
 PROBLEMS = [
     parse("(a & b) | ~c"),                 # circuit -> expression + truth table
@@ -110,11 +116,11 @@ Expression syntax: `&`=AND, `|`=OR, `~`=NOT, `^`=XOR, and functions
 ## Build
 
 ```bash
-make boolean                                    # build boolean_worksheet.pdf
+make boolean                                    # build worksheet_one_boolean_algebra.pdf
 # same thing, explicitly (run from the repo root):
 WS=worksheets/worksheet1_boolean_algebra
-python -m gens.boolgen.build $WS/boolean_worksheet.py --out $WS/build
-python -m gens.boolgen.build $WS/boolean_worksheet.py --out $WS/build --no-pdf  # figures + .tex only
+python -m gens.boolgen.build $WS/worksheet_one_boolean_algebra.py --out $WS/build
+python -m gens.boolgen.build $WS/worksheet_one_boolean_algebra.py --out $WS/build --no-pdf  # figures + .tex only
 ```
 
 The per-problem `figs/pNN.png` / `.svg` are the standalone diagram images for
@@ -138,7 +144,7 @@ gens/boolgen/
   simplify.py  sympy bridge: minimal / De Morgan form for the answer key
   latex.py     engineering-notation formula + truth table + document assembly
   build.py     CLI: worksheet module -> figures + combined PDF
-worksheets/worksheet1_boolean_algebra/boolean_worksheet.py   the questions
+worksheets/worksheet1_boolean_algebra/worksheet_one_boolean_algebra.py   the questions
 ```
 
 ---
@@ -152,7 +158,7 @@ loop back-edges).
 
 Three problem types:
 
-| In `flowchart_worksheet.py`        | Student is given…        | …and must produce       |
+| In `worksheet_two_flowcharts.py`        | Student is given…        | …and must produce       |
 |------------------------------------|--------------------------|-------------------------|
 | `TRACE(algo, {"n": 4})`            | the flowchart + inputs   | the completed trace table |
 | `DRAW(algo)`                       | the pseudocode           | the flowchart           |
@@ -182,7 +188,7 @@ gens/flowgen/
   problem.py    problem kinds: TRACE / DRAW
   latex.py      pseudocode + trace table + document assembly
   build.py      CLI: worksheet module -> figures + worksheet/answers PDFs
-worksheets/worksheet2_flowcharts/flowchart_worksheet.py   the questions
+worksheets/worksheet2_flowcharts/worksheet_two_flowcharts.py   the questions
 gens/wsbase.py      shared LaTeX setup (page geometry, cs17.org footer, Tectonic)
 ```
 
@@ -228,7 +234,7 @@ picture can never disagree.
 
 ### Mixing in revision questions
 
-`binary_worksheet.py` (**Worksheet 3**) and `hex_worksheet.py` (**Worksheet 4**)
+`worksheet_three_binary.py` (**Worksheet 3**) and `worksheet_four_hexadecimal.py` (**Worksheet 4**)
 are number-base sheets that also sprinkle in a couple of Boolean-algebra
 questions and a flowchart trace as revision of Worksheets 1 and 2. There's no
 generic multi-topic engine: the worksheet simply lists ordinary `boolgen` /
@@ -242,7 +248,7 @@ from gens.bingen import TODECIMAL, DECODE
 from gens.boolgen import parse, DIAGRAM, TRUTHTABLE
 from gens.flowgen import Algorithm, read, assign, out, If, While, TRACE
 
-TITLE = "Worksheet 3"
+TITLE = "Worksheet 3: Binary"
 
 PROBLEMS = [
     TODECIMAL("1011", "1100", "0111"),   # binary -> decimal
@@ -262,6 +268,6 @@ gens/bingen/
   latex.py     ASCII reference + conversion lines + decode/pixel grids + assembly;
                dispatches Boolean/flowchart problems to boolgen/flowgen
   build.py     CLI: worksheet module -> worksheet/answers PDFs (+ figs as needed)
-worksheets/worksheet3_binary/binary_worksheet.py   the questions (Worksheet 3)
-worksheets/worksheet4_hexadecimal/hex_worksheet.py the questions (Worksheet 4)
+worksheets/worksheet3_binary/worksheet_three_binary.py   the questions (Worksheet 3)
+worksheets/worksheet4_hexadecimal/worksheet_four_hexadecimal.py the questions (Worksheet 4)
 ```
