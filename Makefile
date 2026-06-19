@@ -8,11 +8,12 @@ WS4 := worksheets/worksheet4_hexadecimal
 WS5 := worksheets/worksheet5_sevensegment
 WS6 := worksheets/worksheet6_decisions
 WS7 := worksheets/worksheet7_loops
+WS8 := worksheets/worksheet8_flowcharts_intermediate
 
-.PHONY: all boolean flowchart binary hex sevenseg decisions loops pdfs setup clean
+.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate pdfs setup clean
 
 # Build every worksheet, then collect all PDFs into pdfs/  ->  make
-all: boolean flowchart binary hex sevenseg decisions loops pdfs
+all: boolean flowchart binary hex sevenseg decisions loops intermediate pdfs
 
 boolean:
 	$(PY) -m gens.boolgen.build $(WS1)/worksheet_1_boolean_algebra.py --out $(WS1)/build
@@ -34,6 +35,9 @@ decisions:
 
 loops:
 	$(PY) -m gens.flowgen.build $(WS7)/worksheet_7_simple_loops.py --out $(WS7)/build
+
+intermediate:
+	$(PY) -m gens.flowgen.build $(WS8)/worksheet_8_flowcharts_intermediate.py --out $(WS8)/build
 
 # Gather every PDF into pdfs/ as symlinks (build/ holds figures + .tex), split
 # into pdfs/sheets/ (the worksheets) and pdfs/answer_keys/ (the -answers PDFs)

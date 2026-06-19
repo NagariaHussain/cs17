@@ -60,11 +60,15 @@ def _trace_table(cols, rows, *, fill: bool) -> str:
 def _trace_instruction(inputs: dict) -> str:
     """E.g. 'Trace this algorithm for $n = 3$, where the values of $marks$
     entered are 55, 82, 40 (in that order), and complete the trace table.'"""
-    scalars = {k: v for k, v in inputs.items() if not isinstance(v, list)}
+    scalars = {k: v for k, v in inputs.items() if not isinstance(v, (list, tuple))}
+    arrays = {k: v for k, v in inputs.items() if isinstance(v, tuple)}
     queues = {k: v for k, v in inputs.items() if isinstance(v, list)}
     text = r"Trace this algorithm"
     if scalars:
         text += r" for $%s$" % _esc(", ".join(f"{k} = {v}" for k, v in scalars.items()))
+    for k, vals in arrays.items():  # a given array (constant, indexed by the algorithm)
+        listed = "[" + ", ".join(str(v) for v in vals) + "]"
+        text += r", taking the list $%s$ to be %s" % (_esc(k), _esc(listed))
     for k, vals in queues.items():
         text += r", where the values of $%s$ entered are %s (in that order)" % (
             _esc(k), _esc(", ".join(str(v) for v in vals)))

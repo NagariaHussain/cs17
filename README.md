@@ -22,6 +22,7 @@ worksheets/
   worksheet5_sevensegment/      worksheet_5_seven_segment_display.py     + build/   (WS5)
   worksheet6_decisions/         worksheet_6_decisions_and_calculations.py + build/   (WS6)
   worksheet7_loops/             worksheet_7_simple_loops.py             + build/   (WS7)
+  worksheet8_flowcharts_intermediate/ worksheet_8_flowcharts_intermediate.py + build/ (WS8)
 pdfs/                           all PDFs symlinked, split into sheets/ and answer_keys/
 assignments/
   q1-p2_jugaad_inventory/       README + build_seed.py + references/

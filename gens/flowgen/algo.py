@@ -127,10 +127,15 @@ def run(algo: Algorithm, inputs: dict, *, step_limit: int = 2000):
       outputs : list of all printed values, in order
 
     An input value may be a list: each `read` of that variable consumes the
-    next value (for reads inside a loop, e.g. the marks of n students).
+    next value (for reads inside a loop, e.g. the marks of n students). A
+    tuple value is instead a *given array* — a constant the algorithm indexes
+    (e.g. arr[mid] in a binary search). It is seeded into the environment but is
+    never `read` and never becomes a trace-table column.
     """
     env: dict = {}
+    consts = {k: v for k, v in inputs.items() if isinstance(v, tuple)}
     queues = {k: list(v) for k, v in inputs.items() if isinstance(v, list)}
+    env.update(consts)  # given arrays: indexable in expressions, not a column
     cols: list[str] = []
     rows: list[tuple[dict, object]] = []
     outputs: list = []
