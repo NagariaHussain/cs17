@@ -283,6 +283,8 @@ def build_document(rendered, *, title: str, answer_key: bool) -> str:
     body = [_PREAMBLE, r"\begin{document}", r"\wstitle{%s}" % title]
     if answer_key:
         body.append(r"\textit{Answer key}\par\vspace{8pt}")
+    else:
+        body.append(r"\wsnamefield")
     if any(isinstance(p, Problem) and p.kind == "decode" for p, _ in rendered):
         body += _reference_section()
     for i, (problem, fig_stem) in enumerate(rendered, 1):

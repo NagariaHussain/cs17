@@ -14,6 +14,10 @@ from gens.boolgen import parse, CIRCUIT, TRUTHTABLE
 
 TITLE = "Worksheet 1: Boolean Algebra"
 
+# show the XOR-identity reminder box on the worksheet (this is the sheet that
+# first introduces XOR; later sheets have students derive it themselves)
+XOR_REMINDER = True
+
 PROBLEMS = [
     # ---- Part A: read the circuit -> write the expression + draw truth table ----
     parse("(a & b) | ~c"),

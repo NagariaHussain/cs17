@@ -24,15 +24,22 @@ class Problem:
     note: str = ""      # in-question hint (e.g. explain notation not yet taught)
     description: str = ""  # for "draw": plain-English statement instead of pseudocode
     example: str = ""   # for "draw": a worked example shown above the predict table
+    reveal: str = ""    # for "trace": real-world note shown AFTER the trace table
 
     def __post_init__(self):
         assert self.kind in KINDS, f"unknown kind {self.kind!r}"
 
 
-def TRACE(algo: Algorithm, inputs: dict, note: str = "", description: str = "") -> Problem:
+def TRACE(algo: Algorithm, inputs: dict, note: str = "", description: str = "",
+          reveal: str = "") -> Problem:
     """Trace the flowchart. `description` is an optional written use case /
-    plain-English statement of the algorithm shown before the flowchart."""
-    return Problem(algo, "trace", inputs, note=note, description=description)
+    plain-English statement of the algorithm shown before the flowchart.
+
+    `reveal` is shown AFTER the trace table — use it to name the real-world
+    algorithm the flowchart implements only once the student has traced it
+    (so the flowchart is presented neutrally, then explained at the end)."""
+    return Problem(algo, "trace", inputs, note=note, description=description,
+                   reveal=reveal)
 
 
 def DRAW(algo: Algorithm, description: str = "", predict: list | None = None,

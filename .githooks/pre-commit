@@ -3,35 +3,39 @@
 # Sources: the worksheet modules and the generator packages (the .tex files in
 # build/ are themselves generated from these, so they are the real triggers).
 #
-# Dependencies to keep in mind: gens/wsbase.py is shared by every sheet; and the
+# Dependencies to keep in mind: gens/wsbase.py is shared by every sheet; the
 # binary/hex sheets (Worksheets 3 & 4) embed boolgen/flowgen revision questions,
+# and the mixed sheet (Worksheet 9) is boolgen-hosted but embeds flowgen traces —
 # so a change to gens/boolgen/ or gens/flowgen/ must rebuild those sheets too.
 set -e
 
 staged=$(git diff --cached --name-only)
 match() { echo "$staged" | grep -qE "$1"; }
 
-bld_boolean=false; bld_flow=false; bld_binary=false; bld_hex=false
+bld_boolean=false; bld_flow=false; bld_binary=false; bld_hex=false; bld_mixed=false
 
-match '^gens/wsbase\.py$'  && { bld_boolean=true; bld_flow=true; bld_binary=true; bld_hex=true; }
-match '^gens/boolgen/'     && { bld_boolean=true; bld_binary=true; bld_hex=true; }
-match '^gens/flowgen/'     && { bld_flow=true;    bld_binary=true; bld_hex=true; }
+match '^gens/wsbase\.py$'  && { bld_boolean=true; bld_flow=true; bld_binary=true; bld_hex=true; bld_mixed=true; }
+match '^gens/boolgen/'     && { bld_boolean=true; bld_binary=true; bld_hex=true; bld_mixed=true; }
+match '^gens/flowgen/'     && { bld_flow=true;    bld_binary=true; bld_hex=true; bld_mixed=true; }
 match '^gens/bingen/'      && { bld_binary=true;  bld_hex=true; }
 match '/worksheet_1_boolean_algebra\.py$' && bld_boolean=true
 match '/worksheet_2_flowcharts\.py$'      && bld_flow=true
 match '/worksheet_3_binary\.py$'        && bld_binary=true
 match '/worksheet_4_hexadecimal\.py$'    && bld_hex=true
+match '/worksheet_9_logic_and_flowcharts\.py$' && bld_mixed=true
 
 WS1=worksheets/worksheet1_boolean_algebra
 WS2=worksheets/worksheet2_flowcharts
 WS3=worksheets/worksheet3_binary
 WS4=worksheets/worksheet4_hexadecimal
+WS9=worksheets/worksheet9_logic_and_flowcharts
 
 rebuilt=false
 $bld_boolean && { echo "pre-commit: rebuilding boolean worksheet";   make boolean;   git add "$WS1/build"; rebuilt=true; }
 $bld_flow    && { echo "pre-commit: rebuilding flowchart worksheet"; make flowchart; git add "$WS2/build"; rebuilt=true; }
 $bld_binary  && { echo "pre-commit: rebuilding binary worksheet";    make binary;    git add "$WS3/build"; rebuilt=true; }
 $bld_hex     && { echo "pre-commit: rebuilding hex worksheet";       make hex;       git add "$WS4/build"; rebuilt=true; }
+$bld_mixed   && { echo "pre-commit: rebuilding mixed worksheet";     make mixed;     git add "$WS9/build"; rebuilt=true; }
 
 # Refresh the pdfs/ symlink farm whenever any sheet was rebuilt.
 $rebuilt && { make pdfs >/dev/null; git add pdfs; }

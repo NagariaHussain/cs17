@@ -37,6 +37,11 @@ _BASE = r"""\documentclass[11pt]{article}
 \newcommand{\wstitle}[1]{%
   \noindent{\LARGE\brandfont\bfseries\color{brand}CS17}\hfill{\Large #1}\par
   \vspace{5pt}{\color{black}\hrule height 0.8pt}\par\vspace{18pt}}
+% blanks for the student to fill in (these are physical hand-outs); shown on the
+% worksheet under the title, not on the answer key
+\newcommand{\wsnamefield}{%
+  \noindent Name:~\rule[-0.35em]{6.5cm}{0.4pt}\hfill Date:~\rule[-0.35em]{3.5cm}{0.4pt}%
+  \par\vspace{16pt}}
 """
 
 

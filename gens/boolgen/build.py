@@ -21,16 +21,26 @@ import importlib.util
 from pathlib import Path
 
 from .. import wsbase
+from ..flowgen.flowchart import render as _render_flow
+from ..flowgen.problem import Problem as _FlowProblem
 
 from . import latex
 from .diagram import render
 from .expr import variables
 from .problem import Problem, DIAGRAM
 
+# Boolean problem kinds that SHOW a circuit and so need a rendered figure: the
+# gate diagram (worksheet for `diagram`, answer key for `circuit`/`fromtable`).
+_FIG_KINDS = ("diagram", "circuit", "fromtable")
+
 
 def _normalize(item) -> Problem:
-    """Accept a Problem, a bare expression (-> DIAGRAM), or (title, expr)."""
-    if isinstance(item, Problem):
+    """Accept a Problem, a bare expression (-> DIAGRAM), or (title, expr).
+
+    Flowchart-tracing problems (a flowgen Problem) are a boolgen-hosted sheet's
+    revision questions; they pass straight through, handled by their own renderer.
+    """
+    if isinstance(item, (Problem, _FlowProblem)):
         return item
     if isinstance(item, tuple):
         title, expr = item
@@ -44,7 +54,10 @@ def _load_set(path: Path):
     spec.loader.exec_module(mod)
     title = getattr(mod, "TITLE", path.stem)
     problems = getattr(mod, "PROBLEMS")
-    return title, problems
+    # opt-in per worksheet: show the XOR identity reminder box (Worksheet 1 uses
+    # it; sheets where students should derive XOR themselves leave it off)
+    xor_reminder = getattr(mod, "XOR_REMINDER", False)
+    return title, problems, xor_reminder
 
 
 def main(argv=None):
@@ -54,7 +67,7 @@ def main(argv=None):
     ap.add_argument("--no-pdf", action="store_true", help="emit .tex + figures but skip Tectonic")
     args = ap.parse_args(argv)
 
-    title, problems = _load_set(args.set)
+    title, problems, xor_reminder = _load_set(args.set)
     name = args.set.stem
     figs = args.out / name / "figs"
     figs.mkdir(parents=True, exist_ok=True)
@@ -65,12 +78,17 @@ def main(argv=None):
     nfigs = 0
     for i, item in enumerate(problems, 1):
         p = _normalize(item)
-        if p.kind == "truthtable" and len(variables(p.expr)) > 3:
+        if isinstance(p, _FlowProblem):  # flowchart revision question
+            _render_flow(p.algo, str(figs / f"p{i:02d}"))
+            rendered.append((p, f"figs/p{i:02d}"))
+            nfigs += 1
+            continue
+        # the table the student must read (truthtable/fromtable) is capped so it
+        # stays small enough to reason about by hand
+        if p.kind in ("truthtable", "fromtable") and len(variables(p.expr)) > 3:
             raise ValueError(f"problem {i}: truth-table problems are capped at 3 variables")
         fig = None
-        # only kinds that SHOW a circuit need a rendered figure (the diagram
-        # problem on the worksheet; the circuit problem on the answer key)
-        if p.kind in ("diagram", "circuit"):
+        if p.kind in _FIG_KINDS:
             render(p.expr, str(figs / f"p{i:02d}"))  # writes pdf + png + svg
             fig = f"figs/p{i:02d}"
             nfigs += 1
@@ -79,7 +97,8 @@ def main(argv=None):
 
     # two separate PDFs: the worksheet, and the answer key
     for suffix, key in (("", False), ("-answers", True)):
-        tex = latex.build_document(rendered, title=title, answer_key=key)
+        tex = latex.build_document(rendered, title=title, answer_key=key,
+                                   xor_reminder=xor_reminder)
         tex_path = args.out / name / f"{name}{suffix}.tex"
         tex_path.write_text(tex)
         print(f"wrote {tex_path}")

@@ -187,6 +187,8 @@ def build_document(problems, *, title: str, answer_key: bool) -> str:
     body = [_PREAMBLE, r"\begin{document}", r"\wstitle{%s}" % title]
     if answer_key:
         body.append(r"\textit{Answer key}\par\vspace{8pt}")
+    else:
+        body.append(r"\wsnamefield")
     for i, problem in enumerate(problems, 1):
         body.append(_problem_block(i, problem, answer=answer_key))
         body.append(r"\probrule")

@@ -23,6 +23,7 @@ worksheets/
   worksheet6_decisions/         worksheet_6_decisions_and_calculations.py + build/   (WS6)
   worksheet7_loops/             worksheet_7_simple_loops.py             + build/   (WS7)
   worksheet8_flowcharts_intermediate/ worksheet_8_flowcharts_intermediate.py + build/ (WS8)
+  worksheet9_logic_and_flowcharts/ worksheet_9_logic_and_flowcharts.py     + build/   (WS9)
 pdfs/                           all PDFs symlinked, split into sheets/ and answer_keys/
 assignments/
   q1-p2_jugaad_inventory/       README + build_seed.py + references/
@@ -46,8 +47,14 @@ make boolean    # gens.boolgen -> worksheets/worksheet1_boolean_algebra/build/
 make flowchart  # gens.flowgen -> worksheets/worksheet2_flowcharts/build/
 make binary     # gens.bingen  -> worksheets/worksheet3_binary/build/        (Worksheet 3)
 make hex        # gens.bingen  -> worksheets/worksheet4_hexadecimal/build/   (Worksheet 4)
+make mixed      # gens.boolgen -> worksheets/worksheet9_logic_and_flowcharts/build/ (Worksheet 9)
 make pdfs       # just rebuild pdfs/sheets + pdfs/answer_keys from existing builds
 ```
+
+Every worksheet (not the answer key) carries a **Name / Date** field under the
+title, since the sheets are printed and handed out. It is one shared macro
+(`\wsnamefield`, defined in `gens/wsbase.py`) that each generator emits on the
+worksheet document only.
 
 ---
 
@@ -73,7 +80,7 @@ worksheet_1_boolean_algebra.py ──▶ gens.boolgen ──▶ worksheet1_boole
                                    └── worksheet_1_boolean_algebra-answers.pdf ← answer key (separate)
 ```
 
-## Three problem types
+## Four problem types
 
 All authored from the same expression; the *type* picks which direction the
 student works:
@@ -83,6 +90,24 @@ student works:
 | `parse("...")`             | the gate diagram  | the expression + truth table |
 | `CIRCUIT(parse("..."))`    | the expression    | the logic-gate circuit       |
 | `TRUTHTABLE(parse("..."))` | the expression    | the truth table (≤ 3 vars)   |
+| `FROMTABLE(parse("..."))`  | the truth table   | the expression + the circuit (≤ 3 vars) |
+
+`FROMTABLE` runs the loop the other way (truth table → expression → gates), so
+author it from an expression already in **sum-of-products** form (e.g.
+`(a & ~b) | (~a & b)`): the given table, the answer expression, and the answer
+circuit are then all the same single source.
+
+### Hosting flowchart revision (Worksheet 9)
+
+Just as the binary sheets (WS3/WS4) are bingen-hosted but mix in a few
+boolgen/flowgen revision questions, a boolgen sheet can mix in a few **flowgen**
+flowchart-tracing problems. Worksheet 9 is the example: it lists ordinary
+`flowgen` `TRACE(...)` problems alongside the Boolean ones, and `boolgen.build`
+reuses flowgen's own flowchart renderer and block typesetter for them (same
+"reuse, not reimplement" approach as bingen — there is still no generic
+multi-topic engine). `flowgen`'s `TRACE` also grew a `reveal=` argument: a note
+shown *after* the trace table, used on WS9 to name the real-world algorithm a
+flowchart implements only once the student has finished tracing it.
 
 ## Setup (one time)
 

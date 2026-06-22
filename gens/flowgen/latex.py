@@ -159,6 +159,8 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
         if answer:
             shown = ", ".join(_esc(o) for o in outputs)
             parts.append(r"\textbf{Output:}\quad %s" % (shown or r"\textit{(none)}"))
+        if problem.reveal:  # real-world tie-in, shown only after the trace table
+            parts.append(r"\par\vspace{6pt}\textit{%s}" % _esc(problem.reveal))
 
     elif problem.kind == "outputs":
         has_trace = bool(problem.inputs)
@@ -195,6 +197,8 @@ def _section(rendered, *, title, answer_key):
     out = [r"\wstitle{%s}" % title]
     if answer_key:
         out.append(r"\textit{Answer key}\par\vspace{8pt}")
+    else:
+        out.append(r"\wsnamefield")
     for i, (problem, fig) in enumerate(rendered, 1):
         out.append(_problem_block(i, problem, (fig + ".pdf") if fig else "", answer=answer_key))
         out.append(r"\probrule")

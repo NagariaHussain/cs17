@@ -9,11 +9,12 @@ WS5 := worksheets/worksheet5_sevensegment
 WS6 := worksheets/worksheet6_decisions
 WS7 := worksheets/worksheet7_loops
 WS8 := worksheets/worksheet8_flowcharts_intermediate
+WS9 := worksheets/worksheet9_logic_and_flowcharts
 
-.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate pdfs setup clean
+.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed pdfs setup clean
 
 # Build every worksheet, then collect all PDFs into pdfs/  ->  make
-all: boolean flowchart binary hex sevenseg decisions loops intermediate pdfs
+all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed pdfs
 
 boolean:
 	$(PY) -m gens.boolgen.build $(WS1)/worksheet_1_boolean_algebra.py --out $(WS1)/build
@@ -38,6 +39,11 @@ loops:
 
 intermediate:
 	$(PY) -m gens.flowgen.build $(WS8)/worksheet_8_flowcharts_intermediate.py --out $(WS8)/build
+
+# Worksheet 9 is a mixed review: boolgen hosts it (Boolean is the lead topic)
+# and also dispatches its flowchart-tracing problems via flowgen.
+mixed:
+	$(PY) -m gens.boolgen.build $(WS9)/worksheet_9_logic_and_flowcharts.py --out $(WS9)/build
 
 # Gather every PDF into pdfs/ as symlinks (build/ holds figures + .tex), split
 # into pdfs/sheets/ (the worksheets) and pdfs/answer_keys/ (the -answers PDFs)

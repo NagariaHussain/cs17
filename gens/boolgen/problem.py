@@ -1,10 +1,13 @@
 """A worksheet problem = an expression + which direction the student works.
 
-Three kinds, all derived from the same single source expression:
+Four kinds, all derived from the same single source expression:
 
   DIAGRAM     given the gate diagram  -> write the expression + draw truth table
   CIRCUIT     given the expression    -> draw the logic-gate circuit
   TRUTHTABLE  given the expression    -> draw the truth table   (keep <= 3 vars)
+  FROMTABLE   given the truth table   -> write the expression + draw the circuit
+              (author it from a sum-of-products expression, so the given table,
+              the answer expression, and the answer circuit all match; <= 3 vars)
 
 A bare expression in a worksheet defaults to DIAGRAM.
 """
@@ -15,7 +18,7 @@ from dataclasses import dataclass
 
 from .expr import Expr
 
-KINDS = ("diagram", "circuit", "truthtable")
+KINDS = ("diagram", "circuit", "truthtable", "fromtable")
 
 
 @dataclass
@@ -38,3 +41,7 @@ def CIRCUIT(e: Expr, title: str = "") -> Problem:
 
 def TRUTHTABLE(e: Expr, title: str = "") -> Problem:
     return Problem(e, "truthtable", title)
+
+
+def FROMTABLE(e: Expr, title: str = "") -> Problem:
+    return Problem(e, "fromtable", title)

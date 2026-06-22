@@ -15,6 +15,8 @@ sheet), NOT the math ∧∨¬ notation:
 from __future__ import annotations
 
 from .. import wsbase
+from ..flowgen import latex as _flow_latex
+from ..flowgen.problem import Problem as _FlowProblem
 
 from .expr import Expr, Gate, Var, truth_table
 from .simplify import simplify
@@ -64,8 +66,17 @@ def truth_table_latex(e: Expr, *, fill: bool, out: str = "Y") -> str:
     return "\n".join(lines)
 
 
+# A boolgen-hosted sheet (e.g. Worksheet 9) may mix in a few flowchart-tracing
+# problems, reusing flowgen's own block renderer (see _dispatch_block). The
+# preamble therefore unions the packages flowgen needs (listings/needspace/array)
+# with boolgen's own (amsmath/enumitem) — same approach as bingen.
 _PREAMBLE = wsbase.preamble(r"""\usepackage{amsmath}
 \usepackage{enumitem}
+\usepackage{listings}
+\usepackage{needspace}
+\usepackage{array}
+\lstset{basicstyle=\ttfamily\small, frame=single, framesep=4pt, xleftmargin=4pt,
+        columns=fullflexible, keepspaces=true, aboveskip=2pt, belowskip=2pt}
 """)
 
 
@@ -111,31 +122,57 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
         else:
             parts.append(r"\vspace{6pt}\par")
 
+    elif kind == "fromtable":
+        # the given (filled) truth table; student finds the expression + circuit
+        parts.append(r"From the truth table below, write the Boolean expression "
+                     r"for output $Y$ as a sum of products (one product term for "
+                     r"each row where $Y = 1$), then draw its logic-gate circuit.")
+        parts.append(r"\begin{center}" + truth_table_latex(e, fill=True) + r"\end{center}")
+        if answer:
+            parts.append(r"\textbf{Expression:}\quad $%s$" % expr_latex(e))
+            simp = simplify(e)
+            if expr_latex(simp) != expr_latex(e):
+                parts.append(r"\par\textbf{Simplifies to:}\quad $%s$" % expr_latex(simp))
+            parts.append(r"\vspace{6pt}\par\textbf{Circuit:}\par\nopagebreak")
+            parts.append(_fig(fig_path))
+        else:
+            parts.append(r"\vspace{90pt}\par")
+
     return "\n".join(parts)
 
 
-def _section(rendered, *, title, answer_key):
-    """rendered: list of (Problem, fig_path | None)."""
+def _dispatch_block(idx, problem, fig_path, *, answer: bool) -> str:
+    """Render one problem, delegating flowchart-tracing questions to flowgen's
+    own block renderer (reuse, not reimplementation)."""
+    if isinstance(problem, _FlowProblem):
+        return _flow_latex._problem_block(idx, problem, fig_path, answer=answer)
+    return _problem_block(idx, problem, fig_path, answer=answer)
+
+
+def _section(rendered, *, title, answer_key, xor_reminder=False):
+    """rendered: list of (Problem | flowgen Problem, fig_path | None)."""
     out = [r"\wstitle{%s}" % title]
     if answer_key:
         out.append(r"\textit{Answer key}\par\vspace{8pt}")
     else:
-        # quick reminder of the XOR identity for revision
-        out.append(r"\fbox{Reminder:\quad $A \oplus B = \overline{A}\,B + A\,\overline{B}$ \quad(XOR)}"
-                   r"\par\vspace{10pt}")
+        out.append(r"\wsnamefield")
+        if xor_reminder:  # opt-in: hand students the XOR identity (see build.py)
+            out.append(r"\fbox{Reminder:\quad $A \oplus B = \overline{A}\,B + A\,\overline{B}$ \quad(XOR)}"
+                       r"\par\vspace{10pt}")
     for i, (problem, fig) in enumerate(rendered, 1):
         fig_path = (fig + ".pdf") if fig else ""
-        out.append(_problem_block(i, problem, fig_path, answer=answer_key))
+        out.append(_dispatch_block(i, problem, fig_path, answer=answer_key))
         out.append(r"\probrule")
     return out
 
 
-def build_document(rendered, *, title: str, answer_key: bool) -> str:
+def build_document(rendered, *, title: str, answer_key: bool, xor_reminder: bool = False) -> str:
     """One document — the worksheet, or (separately) the answer key.
 
     rendered: list of (Problem, fig_path_stem | None). Returns full .tex source.
+    `xor_reminder` shows the XOR-identity box on the worksheet (opt-in per sheet).
     """
     body = [_PREAMBLE, r"\begin{document}"]
-    body += _section(rendered, title=title, answer_key=answer_key)
+    body += _section(rendered, title=title, answer_key=answer_key, xor_reminder=xor_reminder)
     body.append(r"\end{document}")
     return "\n".join(body)
