@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from .. import wsbase
 
-from .algo import Algorithm, pseudocode_text, run
+from .algo import Algorithm, pseudocode_lines, pseudocode_text, run
 
 _PREAMBLE = wsbase.preamble(r"""\usepackage{listings}
 \usepackage{needspace}
@@ -32,6 +32,20 @@ def _fig(path, max_height=r"0.72\textheight"):
 
 def _pseudocode(algo: Algorithm) -> str:
     return "\\begin{lstlisting}\n" + pseudocode_text(algo) + "\n\\end{lstlisting}"
+
+
+def _draw_space(algo: Algorithm) -> str:
+    """A framed, blank box for the student to draw the flowchart in (the sheets
+    are submitted, so they draw on the sheet itself). Its height scales with the
+    algorithm's size — a straight-line sequence gets less room, a loop with a
+    decision inside gets more — clamped so one problem never overruns a page."""
+    n = len(pseudocode_lines(algo))
+    height = min(500, max(300, 55 * n + 130))
+    return (r"\par\vspace{6pt}\begin{center}\fbox{"
+            + (r"\begin{minipage}[t][%dpt][t]{0.92\linewidth}" % height)
+            + r"\textcolor{gray!70}{\footnotesize\itshape Draw your flowchart in "
+              r"this box (rough work in your notebook first).}"
+            + r"\end{minipage}}\end{center}")
 
 
 def _trace_table(cols, rows, *, fill: bool) -> str:
@@ -139,7 +153,7 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
                 parts.append(r"\textbf{(ii)}~Now draw a flowchart for the algorithm.")
             else:
                 parts.append(r"Draw a flowchart for this algorithm:")
-            parts.append(r"\vspace{120pt}\par")
+            parts.append(_draw_space(algo))
         else:
             if predict:
                 parts.append(r"\textbf{(i)}~Expected output for each input:"

@@ -10,11 +10,12 @@ WS6 := worksheets/worksheet6_decisions
 WS7 := worksheets/worksheet7_loops
 WS8 := worksheets/worksheet8_flowcharts_intermediate
 WS9 := worksheets/worksheet9_logic_and_flowcharts
+WS10 := worksheets/worksheet10_drawing_flowcharts
 
-.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed pdfs setup clean
+.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing pdfs setup clean
 
 # Build every worksheet, then collect all PDFs into pdfs/  ->  make
-all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed pdfs
+all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing pdfs
 
 boolean:
 	$(PY) -m gens.boolgen.build $(WS1)/worksheet_1_boolean_algebra.py --out $(WS1)/build
@@ -44,6 +45,11 @@ intermediate:
 # and also dispatches its flowchart-tracing problems via flowgen.
 mixed:
 	$(PY) -m gens.boolgen.build $(WS9)/worksheet_9_logic_and_flowcharts.py --out $(WS9)/build
+
+# Worksheet 10 is DRAW-only: every problem is a plain-English statement and the
+# student draws the flowchart (the answer key derives the flowchart from source).
+drawing:
+	$(PY) -m gens.flowgen.build $(WS10)/worksheet_10_drawing_flowcharts.py --out $(WS10)/build
 
 # Gather every PDF into pdfs/ as symlinks (build/ holds figures + .tex), split
 # into pdfs/sheets/ (the worksheets) and pdfs/answer_keys/ (the -answers PDFs)
