@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Amend Invoice #{{ invoice['id'] }}{% endblock %}
+{% block body %}
+  <h1>Amend Invoice #{{ invoice['id'] }}</h1>
+  <p class="lede">Correct the facts. The old version is cancelled (a reversing
+    entry nets it to zero) and a new invoice is created, linked back to this one.</p>
+  {% if error %}
+  <p class="error">{{ error }}</p>
+  {% endif %}
+  <form method="post" action="{{ url_for('amend_invoice', id=invoice['id']) }}">
+    <label for="customer">Customer</label>
+    <input type="text" id="customer" name="customer" value="{{ customer }}">
+    <label for="amount">Amount (₹)</label>
+    <input type="text" id="amount" name="amount" value="{{ amount }}">
+    <div>
+      <button type="submit">Save amendment</button>
+    </div>
+  </form>
+{% endblock %}

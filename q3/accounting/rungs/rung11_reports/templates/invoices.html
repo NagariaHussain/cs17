@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Invoices{% endblock %}
+{% block body %}
+  <h1>Invoices</h1>
+  <p class="lede">Every sales invoice you've posted — stored as its own document,
+    separate from the ledger entries it emitted.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Customer</th>
+        <th class="num">Amount</th>
+        <th>Status</th>
+        <th>Posted by</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for invoice in invoices %}
+      <tr>
+        <td><a href="{{ url_for('invoice_detail', id=invoice['id']) }}">{{ invoice['id'] }}</a></td>
+        <td><a href="{{ url_for('invoice_detail', id=invoice['id']) }}">{{ invoice['customer'] }}</a></td>
+        <td class="num">{{ rupees(invoice['amount']) }}</td>
+        <td><span class="status-{{ invoice['status'] }}">{{ invoice['status'] }}</span></td>
+        <td class="muted">{{ invoice['created_by'] or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

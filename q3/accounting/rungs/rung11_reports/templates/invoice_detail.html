@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Invoice #{{ invoice['id'] }}{% endblock %}
+{% block body %}
+  <h1>Invoice #{{ invoice['id'] }}</h1>
+  <p class="lede">The stored document, and the ledger entry it posted.</p>
+
+  <table>
+    <tbody>
+      <tr>
+        <th>Customer</th>
+        <td>{{ invoice['customer'] }}</td>
+      </tr>
+      <tr>
+        <th>Amount</th>
+        <td class="num">{{ rupees(invoice['amount']) }}</td>
+      </tr>
+      <tr>
+        <th>Status</th>
+        <td><span class="status-{{ invoice['status'] }}">{{ invoice['status'] }}</span></td>
+      </tr>
+      <tr>
+        <th>Posted by</th>
+        <td>{{ invoice['created_by'] or '—' }}</td>
+      </tr>
+      {% if invoice['amended_from'] %}
+      <tr>
+        <th>Amended from</th>
+        <td><a href="{{ url_for('invoice_detail', id=invoice['amended_from']) }}">#{{ invoice['amended_from'] }}</a></td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+
+  {% if invoice['status'] == 'Posted' %}
+  <div style="margin-top:16px; display:flex; gap:12px; align-items:center;">
+    <form method="post" action="{{ url_for('cancel_invoice', id=invoice['id']) }}" style="margin:0;">
+      <button type="submit" class="btn-danger" style="margin:0;">Cancel</button>
+    </form>
+    <a class="btn btn-secondary" style="margin:0;" href="{{ url_for('amend_invoice', id=invoice['id']) }}">Amend</a>
+  </div>
+  {% endif %}
+
+  <h1 style="font-size:18px; margin-top:28px;">Ledger entry #{{ invoice['entry_no'] }}</h1>
+  <p class="lede">{{ entry.narration }}</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Account</th>
+        <th class="num">Dr</th>
+        <th class="num">Cr</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for posting in entry.postings %}
+      <tr>
+        <td>{{ posting.account.name }}</td>
+        <td class="num">{% if posting.debit %}{{ rupees(posting.debit) }}{% endif %}</td>
+        <td class="num">{% if posting.credit %}{{ rupees(posting.credit) }}{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

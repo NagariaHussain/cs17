@@ -72,7 +72,7 @@ file remembers; the code above the interface never knew the difference.
   `balance()` rule — is rehydrated from `CHART` when the rows are read back.
   Configuration lives in code, transactional data lives in the database.
 
-## End of the ladder
+## End of Part 1 — the kernel is complete
 
 ```
 0  raw rows            a list of tuples, nothing guards it
@@ -88,8 +88,13 @@ a small but real accounting kernel: typed accounts, balanced-by-construction
 documents posting into one append-only ledger on disk, and reports that are just
 queries over it — the shape ERPNext, QuickBooks, and SAP all take, in miniature.
 
-The natural next step (a course project, not a rung): wrap this kernel in Flask,
-swap `SQLiteLedger` for an ORM-backed one behind the *same* interface, and you
-have the web accounting app q3 set out to build.
+## The next pain
+
+The kernel runs in a terminal — no UI, no users, no way for a bookkeeper to touch
+it. **Part 2** wraps this exact kernel in a Flask web app, one pain-driven rung at
+a time (a URL → forms → list/detail → cancel/amend → login → reports), cashing in
+every abstraction you just built. The kernel itself never changes again.
+
+➡️ [Rung 6 — a URL for the books](../rung6_a_url/)
 
 ⬅️ [Rung 4](../rung4_documents/)

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Invoice #{{ invoice['id'] }}{% endblock %}
+{% block body %}
+  <h1>Invoice #{{ invoice['id'] }}</h1>
+  <p class="lede">The stored document, and the ledger entry it posted.</p>
+
+  {% with messages = get_flashed_messages() %}
+    {% for message in messages %}
+    <p class="error">{{ message }}</p>
+    {% endfor %}
+  {% endwith %}
+
+  {% if invoice['amended_from'] %}
+  <p class="muted">Amended from
+    <a href="{{ url_for('invoice_detail', id=invoice['amended_from']) }}">#{{ invoice['amended_from'] }}</a>.</p>
+  {% endif %}
+  {% if amended_to %}
+  <p class="muted">Amended to
+    <a href="{{ url_for('invoice_detail', id=amended_to) }}">#{{ amended_to }}</a>.</p>
+  {% endif %}
+
+  <table>
+    <tbody>
+      <tr>
+        <th>Customer</th>
+        <td>{{ invoice['customer'] }}</td>
+      </tr>
+      <tr>
+        <th>Amount</th>
+        <td class="num">{{ rupees(invoice['amount']) }}</td>
+      </tr>
+      <tr>
+        <th>Status</th>
+        <td><span class="status-{{ invoice['status'] }}">{{ invoice['status'] }}</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  {% if invoice['status'] == 'Posted' %}
+  <div>
+    <a class="btn btn-secondary" href="{{ url_for('amend_invoice', id=invoice['id']) }}">Amend</a>
+    <form method="post" action="{{ url_for('cancel_invoice', id=invoice['id']) }}"
+          style="display:inline;">
+      <button type="submit" class="btn btn-danger">Cancel</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <h1 style="font-size:18px; margin-top:28px;">Ledger entry #{{ invoice['entry_no'] }}</h1>
+  <p class="lede">{{ entry.narration }}</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Account</th>
+        <th class="num">Dr</th>
+        <th class="num">Cr</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for posting in entry.postings %}
+      <tr>
+        <td>{{ posting.account.name }}</td>
+        <td class="num">{% if posting.debit %}{{ rupees(posting.debit) }}{% endif %}</td>
+        <td class="num">{% if posting.credit %}{{ rupees(posting.credit) }}{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

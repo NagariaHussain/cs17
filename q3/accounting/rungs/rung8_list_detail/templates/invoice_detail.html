@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Invoice #{{ invoice['id'] }}{% endblock %}
+{% block body %}
+  <h1>Invoice #{{ invoice['id'] }}</h1>
+  <p class="lede">The stored document, and the ledger entry it posted.</p>
+
+  <table>
+    <tbody>
+      <tr>
+        <th>Customer</th>
+        <td>{{ invoice['customer'] }}</td>
+      </tr>
+      <tr>
+        <th>Amount</th>
+        <td class="num">{{ rupees(invoice['amount']) }}</td>
+      </tr>
+      <tr>
+        <th>Status</th>
+        <td><span class="status-{{ invoice['status'] }}">{{ invoice['status'] }}</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h1 style="font-size:18px; margin-top:28px;">Ledger entry #{{ invoice['entry_no'] }}</h1>
+  <p class="lede">{{ entry.narration }}</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Account</th>
+        <th class="num">Dr</th>
+        <th class="num">Cr</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for posting in entry.postings %}
+      <tr>
+        <td>{{ posting.account.name }}</td>
+        <td class="num">{% if posting.debit %}{{ rupees(posting.debit) }}{% endif %}</td>
+        <td class="num">{% if posting.credit %}{{ rupees(posting.credit) }}{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

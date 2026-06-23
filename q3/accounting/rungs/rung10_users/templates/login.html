@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block body %}
+  <h1>Log in</h1>
+  <p class="lede">The books are locked — even reading the trial balance needs an
+    account, so every posting can record who made it.</p>
+  {% if error %}
+  <p class="error">{{ error }}</p>
+  {% endif %}
+  <form method="post" action="{{ url_for('login') }}">
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" value="{{ username }}">
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password">
+    <div>
+      <button type="submit">Log in</button>
+    </div>
+  </form>
+  <p class="muted" style="margin-top:18px;">
+    No account? <a href="{{ url_for('register') }}">Register</a>.
+  </p>
+{% endblock %}

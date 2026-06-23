@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Profit &amp; Loss{% endblock %}
+{% block body %}
+  <h1>Profit &amp; Loss</h1>
+  <p class="lede">Did we make money? A query over the one ledger: Income accounts
+    less Expense accounts, sorted by their kernel type.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Income</th>
+        <th class="num">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for account, balance in income %}
+      <tr>
+        <td>{{ account.name }}</td>
+        <td class="num">{{ rupees(balance) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>Total Income</td>
+        <td class="num">{{ rupees(total_income) }}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <table style="margin-top:24px;">
+    <thead>
+      <tr>
+        <th>Expense</th>
+        <th class="num">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for account, balance in expense %}
+      <tr>
+        <td>{{ account.name }}</td>
+        <td class="num">{{ rupees(balance) }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td class="muted">No expenses yet</td>
+        <td class="num"></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>Total Expense</td>
+        <td class="num">{{ rupees(total_expense) }}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <table style="margin-top:24px;">
+    <tfoot>
+      <tr>
+        <td>NET PROFIT</td>
+        <td class="num {% if net_profit > 0 %}ok{% elif net_profit < 0 %}bad{% endif %}">{{ rupees(net_profit) }}</td>
+      </tr>
+    </tfoot>
+  </table>
+{% endblock %}

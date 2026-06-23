@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Trial Balance{% endblock %}
+{% block body %}
+  <h1>Trial Balance</h1>
+  <p class="lede">Every account on its natural side, read straight from the books.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Account</th>
+        <th class="num">Dr</th>
+        <th class="num">Cr</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for account, balance in rows %}
+      <tr>
+        <td>{{ account.name }}</td>
+        <td class="num">{% if account.normal_side == "Dr" %}{{ rupees(balance) }}{% endif %}</td>
+        <td class="num">{% if account.normal_side == "Cr" %}{{ rupees(balance) }}{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>TOTAL</td>
+        <td class="num">{{ rupees(total_dr) }}</td>
+        <td class="num">{{ rupees(total_cr) }}</td>
+      </tr>
+    </tfoot>
+  </table>
+  {% if total_dr == total_cr %}
+  <p class="ok">Debits equal credits ✓</p>
+  {% endif %}
+{% endblock %}

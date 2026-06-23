@@ -20,7 +20,7 @@ previous rung made you feel.
 Accounting is the oldest information system, the first business-computing
 workload, *and* the killer app of the personal computer.
 
-## The abstraction ladder
+## Part 1 — the kernel: an abstraction ladder
 
 Each rung is a runnable program. Every rung posts the **same** running example
 — *"I put ₹1,000 of my own cash into the business, then bought ₹300 of supplies"*
@@ -43,9 +43,34 @@ Storage (SQLite) is deliberately **not** rung 0. We stay in plain Python until
 the coupling to "where the data lives" actually hurts (rung 5) — same principle
 as everything else: don't introduce the abstraction before the pain.
 
+## Part 2 — wrapping the kernel in a web app
+
+Part 1 built the *kernel* (the model). Part 2 wraps it in Flask, one pain-driven
+rung at a time — and never touches the kernel again. Each rung **cashes in** an
+abstraction from Part 1: the storage boundary lets the web layer sit on top
+untouched, documents become forms, the append-only ledger forces honest
+corrections, polymorphic accounts make new reports into just new queries.
+
+Each Part-2 rung is a **frozen, self-contained Flask app** that vendors a
+byte-identical `kernel.py`, so you can run any one and diff it against the rung
+before it.
+
+| Rung | Folder | New idea | The pain it removes |
+|------|--------|----------|---------------------|
+| 6 | [`rungs/rung6_a_url`](rungs/rung6_a_url/) | **the web layer** — a URL renders the report | reading the books meant running a script in a terminal |
+| 7 | [`rungs/rung7_create`](rungs/rung7_create/) | **forms + validation** — a POST builds a document | recording a sale meant editing Python |
+| 8 | [`rungs/rung8_list_detail`](rungs/rung8_list_detail/) | **documents as a table** (doctype vs GL) — list & detail | you could post but not *see* individual invoices |
+| 9 | [`rungs/rung9_cancel_amend`](rungs/rung9_cancel_amend/) | **cancel & amend** — corrections as new facts | append-only books can't be `UPDATE`d/`DELETE`d |
+| 10 | [`rungs/rung10_users`](rungs/rung10_users/) | **users & login** — the audit trail | the ledger knew *what* happened, not *who* |
+| 11 | [`rungs/rung11_reports`](rungs/rung11_reports/) | **reports as queries** — P&L + Balance Sheet | the trial balance isn't the report owners read |
+
+Rung 11 is the capstone: a logged-in CRUD accounting web app — invoices that
+post balanced entries, cancel/amend, and a Profit & Loss + Balance Sheet that are
+just queries over the one ledger. The app q3 set out to build.
+
 ## How to run
 
-Each rung is self-contained, no dependencies:
+**Part 1 — the kernel.** Plain Python, no dependencies. Run in order:
 
 ```sh
 python q3/accounting/rungs/rung0_raw_rows/ledger.py
@@ -56,9 +81,18 @@ python q3/accounting/rungs/rung4_documents/ledger.py
 python q3/accounting/rungs/rung5_storage/ledger.py
 ```
 
-Run them in order. The trial balance stays identical through Rungs 0→2 while the
-code underneath changes character — then Rung 3 upgrades it to a real two-column
-report once the program understands what each account means.
+The trial balance stays identical through Rungs 0→2 while the code underneath
+changes character — then Rung 3 upgrades it to a real two-column report once the
+program understands what each account means.
+
+**Part 2 — the web app.** Each rung is a Flask app. From inside any rung folder:
+
+```sh
+cd q3/accounting/rungs/rung6_a_url        # any of rungs 6–11
+pip install -r requirements.txt
+flask --app app run
+# open http://localhost:5000/   (rungs 10–11: log in as admin / admin)
+```
 
 ## Teaching notes
 

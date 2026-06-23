@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Balance Sheet{% endblock %}
+{% block body %}
+  <h1>Balance Sheet</h1>
+  <p class="lede">What do we own, and what do we owe? Another query over the same
+    ledger: Assets on one side, Liabilities + Equity on the other.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Assets</th>
+        <th class="num">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for account, balance in assets %}
+      <tr>
+        <td>{{ account.name }}</td>
+        <td class="num">{{ rupees(balance) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>Total Assets</td>
+        <td class="num">{{ rupees(total_assets) }}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <table style="margin-top:24px;">
+    <thead>
+      <tr>
+        <th>Equity &amp; Liabilities</th>
+        <th class="num">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for account, balance in liabilities %}
+      <tr>
+        <td>{{ account.name }}</td>
+        <td class="num">{{ rupees(balance) }}</td>
+      </tr>
+      {% endfor %}
+      {% for account, balance in equity %}
+      <tr>
+        <td>{{ account.name }}</td>
+        <td class="num">{{ rupees(balance) }}</td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td>Net Profit <span class="muted">(from P&amp;L)</span></td>
+        <td class="num">{{ rupees(net_profit) }}</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>Total Equity &amp; Liabilities</td>
+        <td class="num">{{ rupees(total_eq_liab) }}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  {% if total_assets == total_eq_liab %}
+  <p class="ok">In balance ✓</p>
+  {% endif %}
+  <p class="muted">Note: the Net Profit carried from the P&amp;L is exactly what
+    makes the two sides tie out — profit flows into equity.</p>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}New Invoice{% endblock %}
+{% block body %}
+  <h1>New Invoice</h1>
+  <p class="lede">State the business fact — who you invoiced and for how much.
+    The document emits its own balanced entry: Debtors up, Sales up.</p>
+  {% if error %}
+  <p class="error">{{ error }}</p>
+  {% endif %}
+  <form method="post" action="{{ url_for('new_invoice') }}">
+    <label for="customer">Customer</label>
+    <input type="text" id="customer" name="customer" value="{{ customer }}">
+    <label for="amount">Amount (₹)</label>
+    <input type="text" id="amount" name="amount" value="{{ amount }}">
+    <div>
+      <button type="submit">Create invoice</button>
+    </div>
+  </form>
+{% endblock %}

@@ -2,6 +2,8 @@
 __pycache__/
 *.pyc
 .DS_Store
+# q3 web rungs create their SQLite DB at runtime
+books.db
 # worksheets/*/build/: PDFs and figure images are checked in; LaTeX intermediates are not
 worksheets/**/build/**/*.tex
 worksheets/**/build/**/*.aux
