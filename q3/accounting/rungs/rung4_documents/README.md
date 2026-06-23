@@ -82,11 +82,13 @@ The business made its first sale, so two accounts join the trial balance:
 ₹500 invoice and a ₹200 payment, Debtors correctly shows ₹300 still outstanding,
 and the books balance at ₹1500 on each side.
 
-## What's next (preview, not built yet)
+## The next pain
 
-- **Rung 5 — Storage.** The ledger is still an in-memory Python list — close the
-  program and the books evaporate. Swap the list for SQLite, then an ORM, behind
-  the same `Ledger` interface, with nothing above it changing. That's
-  **dependency inversion**: the app depends on "a ledger", not on "a list".
+The ledger is still an in-memory Python list — close the program and the books
+evaporate. The list needs to become a file on disk, but *without* welding the
+database to every report and document. The app should depend on "a ledger", not
+on "a list".
+
+➡️ [Rung 5 — storage](../rung5_storage/)
 
 ⬅️ [Rung 3](../rung3_accounts/)

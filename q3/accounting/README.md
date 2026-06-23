@@ -37,7 +37,7 @@ new concept (what an account *is*), and a real trial balance falls out.
 | 2 | [`rungs/rung2_objects`](rungs/rung2_objects/) | **encapsulation** — the rule lives *inside* the entry object | you had to *remember* to check |
 | 3 | [`rungs/rung3_accounts`](rungs/rung3_accounts/) | **polymorphism** — `account.balance()` by account type | `if asset: ... else: ...` everywhere |
 | 4 | [`rungs/rung4_documents`](rungs/rung4_documents/) | **interfaces** — documents *emit* balanced entries | hand-writing Dr/Cr for every invoice |
-| 5 | _(later)_ `rung5_storage` | **dependency inversion** — swap list → SQLite → ORM | the DB is welded to the app |
+| 5 | [`rungs/rung5_storage`](rungs/rung5_storage/) | **dependency inversion** — swap list → SQLite → ORM | the DB is welded to the app |
 
 Storage (SQLite) is deliberately **not** rung 0. We stay in plain Python until
 the coupling to "where the data lives" actually hurts (rung 5) — same principle
@@ -53,6 +53,7 @@ python q3/accounting/rungs/rung1_a_function/ledger.py
 python q3/accounting/rungs/rung2_objects/ledger.py
 python q3/accounting/rungs/rung3_accounts/ledger.py
 python q3/accounting/rungs/rung4_documents/ledger.py
+python q3/accounting/rungs/rung5_storage/ledger.py
 ```
 
 Run them in order. The trial balance stays identical through Rungs 0→2 while the
