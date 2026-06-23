@@ -79,11 +79,16 @@ identity, two postings to `cash` refer to the *same* account. A typo'd
 `Asset("Cassh")` is a different object you have to create deliberately — strings
 used to open a phantom account silently.
 
-## What's next (previews, not built yet)
+## The next pain
 
-- **Rung 4 — Documents.** A `SalesInvoice` shouldn't make you hand-write
-  `Dr Debtors / Cr Sales`. It should *emit* a balanced `JournalEntry` itself —
-  the moment the "every document posts to the ledger" architecture clicks.
+You still hand-write `Dr Debtors / Cr Sales` for every sale, holding each
+transaction's accounting recipe in your head. That recipe belongs to the
+*document* — a `SalesInvoice` should *emit* its own balanced entry.
+
+➡️ [Rung 4 — documents](../rung4_documents/)
+
+## Later (preview, not built yet)
+
 - **Rung 5 — Storage.** Swap the in-memory list for SQLite, then an ORM, behind
   the same `Ledger` interface, with nothing above it changing.
 
