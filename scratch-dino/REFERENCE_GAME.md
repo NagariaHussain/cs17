@@ -46,14 +46,14 @@ everywhere.
 
 Three sound effects ripped straight from the real Chrome game live in
 `assets/sounds/`. In Scratch, a sound can only be used by the sprite it's loaded
-into, so import each `.ogg` onto the right sprite via the **Sounds** tab →
-*Upload Sound*:
+into, so import each `.mp3` onto the right sprite via the **Sounds** tab →
+*Upload Sound* (Scratch accepts MP3/WAV, not Ogg):
 
 | File | Import onto | Plays when |
 |---|---|---|
-| `jump.ogg`      | **Dino**   | the dino jumps |
-| `game_over.ogg` | **Dino**   | the dino hits a cactus |
-| `score.ogg`     | **Cactus** | you clear a cactus (the `+1` moment) |
+| `jump.mp3`      | **Dino**   | the dino jumps |
+| `game_over.mp3` | **Dino**   | the dino hits a cactus |
+| `score.mp3`     | **Cactus** | you clear a cactus (the `+1` moment) |
 
 > `start sound [ … ]` fires the sound and lets the script keep running (no wait).
 > Use `play sound [ … ] until done` only when you want everything to pause for it.
