@@ -208,6 +208,46 @@ Tune the `/ 5` until it feels right.
 
 ---
 
+## Ground sprite — scrolling horizon (optional Day-5 polish)
+
+The simple version just **draws** a ground line on the backdrop (see *Stage setup*).
+For the authentic Chrome look, use the real horizon costume — `assets/sliced/ground.png`
+(2400×24: the line, pebbles, and a few bumps) — and scroll it endlessly past the
+dino. Same idea as the cactuses: *the dino stays put, the world slides left.*
+
+Two copies of the ground leapfrog forever. When one slides fully off the left, it
+jumps back to the right edge of the other, so the loop never shows a gap. Because
+clones don't get a `when green flag clicked`, both the original and the clone call
+one shared **`scroll`** custom block.
+
+```
+define scroll
+forever
+  change x by ( (0) - (speed) )        // slide left at the same speed as cactuses
+  if < (x position) < (-2400) > then   // fully off the left? (one costume width)
+    change x by (4800)                 // jump two widths right, behind the other copy
+  end
+end
+```
+
+```
+when green flag clicked
+switch costume to [ground v]
+go to x: (0) y: (-80)                   // line sits at the floor; tune y to taste
+create clone of [myself v]
+scroll
+
+when I start as a clone
+go to x: (2400) y: (-80)                // start one costume-width to the right
+scroll
+```
+
+> The flat line runs edge-to-edge, so the seam between the two copies is invisible.
+> `2400` is the costume's width — if you scale the ground, change `2400`/`4800` to
+> match (one width / two widths).
+
+---
+
 ## GameOver sprite — scripts
 
 ```

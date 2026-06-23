@@ -50,7 +50,8 @@ REGIONS = [
     ("restart_circle", 151,135,  211,187, 1),  # circular-arrow restart icon
     ("restart_button", 218,130,  577,193, 5),  # 5 rounded restart buttons
 
-    # --- decor (optional) ---
+    # --- ground / decor (optional) ---
+    ("ground",           2,104, 2401,127, 1),  # full horizon line: flat line + pebbles + bumps
     ("cloud",          174,  2,  257, 28, 1),
     # moon: 7 phases (thin crescent -> full -> thin crescent), unequal widths,
     # cut at the thin "valleys" between crescents. The sparkle is a separate star.
