@@ -39,9 +39,15 @@ REGIONS = [
     ("dino_duck",     2206, 36, 2441, 95, 2),  # 2 ducking frames (optional)
 
     # --- obstacles ---
-    ("cactus_large_a", 652,  2,  749, 90, 1),
-    ("cactus_large_b", 752,  2,  951, 90, 1),
-    ("cactus_small",   446,  2,  649, 71, 1),  # cluster of small cacti — trim one in Scratch
+    # Cactus strips are pre-packed obstacle groups: a 1-, 2-, then 3-cactus
+    # cluster laid side by side (this is exactly how Chrome's Obstacle.draw
+    # indexes them by `size`). Small cells are 34px wide, large cells 50px.
+    ("cactus_small_1", 446,  2,  479, 71, 1),  # single small cactus
+    ("cactus_small_2", 480,  2,  547, 71, 1),  # pair
+    ("cactus_small_3", 548,  2,  649, 71, 1),  # triple
+    ("cactus_large_1", 652,  2,  701,101, 1),  # single large cactus
+    ("cactus_large_2", 702,  2,  801,101, 1),  # pair
+    ("cactus_large_3", 802,  2,  951,101, 1),  # triple
     ("pterodactyl",    260,  2,  443, 81, 2),  # 2 flap frames (optional flying obstacle)
 
     # --- UI / text ---
@@ -72,7 +78,7 @@ Scratch costume        ->  file(s) in assets/sliced/
   Dino  run1 / run2    ->  dino_run_3.png + dino_run_4.png  (alternating legs)
   Dino  jump / idle    ->  dino_run_1.png  (legs together, no ground line)
   Dino  dead           ->  dino_dead.png
-  Cactus               ->  cactus_large_a.png
+  Cactus               ->  cactus_large_1.png  (single; _2/_3 are 2- and 3-cactus groups)
   GameOver text        ->  game_over.png
   Restart (optional)   ->  restart_circle.png
 """

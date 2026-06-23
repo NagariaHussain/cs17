@@ -192,6 +192,26 @@ end
 > `(0) - (speed)` is the **Operators** subtraction block with `speed` dropped into the
 > right slot. That's how you move left by a positive variable.
 
+### How the real Chrome game does cactuses (and what we borrowed)
+
+Reading Chrome's own source (`Obstacle` in `offline.js`) explains the costumes in
+`assets/sliced/`:
+
+- **Two sizes.** `cactusSmall` (17×35) and `cactusLarge` (25×50). The sprite sheet
+  packs each as **three pre-drawn clusters side by side**: a 1-, 2-, then 3-cactus
+  group. That's why we sliced `cactus_small_1/_2/_3` and `cactus_large_1/_2/_3`.
+- **Random group size.** Each obstacle picks `size = random 1…3`. So one "cactus"
+  is sometimes a wall of three — the single hardest difficulty knob in the game.
+- **Eased-in difficulty.** A group is forced back to a single cactus while the game
+  `speed` is below the type's threshold (small: 4, large: 7). Early on you only see
+  lone cactuses; clusters appear once you've sped up.
+- **Smart spacing.** The gap to the next obstacle scales with both its width and the
+  current speed (`width*speed + minGap`), so faster + wider always leaves room to react.
+
+Our Scratch build keeps it simpler — one cactus costume, fixed-ish spacing — but you
+can graft any of this on: e.g. in the spawner, `switch costume to (pick random …)`
+among the six cactus costumes, gated on `speed`, to recreate the cluster ramp.
+
 ---
 
 ## Difficulty ramp (put this on the Stage, or on the Dino as a 5th script)
