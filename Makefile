@@ -12,11 +12,12 @@ WS8 := worksheets/worksheet8_flowcharts_intermediate
 WS9 := worksheets/worksheet9_logic_and_flowcharts
 WS10 := worksheets/worksheet10_drawing_flowcharts
 WS11 := worksheets/worksheet11_coordinate_system
+WS12 := worksheets/worksheet12_scratch_projects
 
-.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords pdfs setup clean
+.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch pdfs setup clean
 
 # Build every worksheet, then collect all PDFs into pdfs/  ->  make
-all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords pdfs
+all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch pdfs
 
 boolean:
 	$(PY) -m gens.boolgen.build $(WS1)/worksheet_1_boolean_algebra.py --out $(WS1)/build
@@ -57,6 +58,13 @@ drawing:
 # y / move / turn) to hit a target. Built by the turtlegen generator (inline TikZ).
 coords:
 	$(PY) -m gens.turtlegen.build $(WS11)/worksheet_11_coordinate_system.py --out $(WS11)/build
+
+# Worksheet 12 is a follow-along build sheet: the student opens Scratch and makes
+# small projects (basic blocks, movement, events). Each project's finished script
+# is authored once in scratchgen and rendered via the scratch3 package, so the
+# blocks shown match the prose build steps. Built by the scratchgen generator.
+scratch:
+	$(PY) -m gens.scratchgen.build $(WS12)/worksheet_12_scratch_projects.py --out $(WS12)/build
 
 # Gather every PDF into pdfs/ as symlinks (build/ holds figures + .tex), split
 # into pdfs/sheets/ (the worksheets) and pdfs/answer_keys/ (the -answers PDFs)
