@@ -5,9 +5,15 @@ from __future__ import annotations
 from .. import wsbase
 
 from .algo import Algorithm, pseudocode_lines, pseudocode_text, run
+from .scratch import scratch_blocks
 
 _PREAMBLE = wsbase.preamble(r"""\usepackage{listings}
 \usepackage{needspace}
+\usepackage{scratch3}
+\setdefaultscratch{else word=else}
+% repeat-until as a clean C-block with no loop arrow (Scratch's repeat-until has
+% none): the package's internal loop macro, args {text}{body}{else}{infinite}{arrow}.
+\newcommand\blockrepeatuntil[2]{\csname scr_blockloop\endcsname{#1}{#2}{}00}
 \lstset{basicstyle=\ttfamily\small, frame=single, framesep=4pt, xleftmargin=4pt,
         columns=fullflexible, keepspaces=true, aboveskip=2pt, belowskip=2pt}
 """)
@@ -71,13 +77,13 @@ def _trace_table(cols, rows, *, fill: bool) -> str:
     return "\n".join(out)
 
 
-def _trace_instruction(inputs: dict) -> str:
+def _trace_instruction(inputs: dict, noun: str = "algorithm") -> str:
     """E.g. 'Trace this algorithm for $n = 3$, where the values of $marks$
     entered are 55, 82, 40 (in that order), and complete the trace table.'"""
     scalars = {k: v for k, v in inputs.items() if not isinstance(v, (list, tuple))}
     arrays = {k: v for k, v in inputs.items() if isinstance(v, tuple)}
     queues = {k: v for k, v in inputs.items() if isinstance(v, list)}
-    text = r"Trace this algorithm"
+    text = r"Trace this %s" % noun
     if scalars:
         text += r" for $%s$" % _esc(", ".join(f"{k} = {v}" for k, v in scalars.items()))
     for k, vals in arrays.items():  # a given array (constant, indexed by the algorithm)
@@ -120,6 +126,24 @@ def _fig_beside_trace(fig_path, cols, rows, *, fill: bool) -> list:
     ]
 
 
+def _scratch_beside_trace(algo, cols, rows, *, fill: bool) -> list:
+    """Scratch script and trace table side by side — the Scratch counterpart of
+    _fig_beside_trace, used when a problem presents the program as blocks."""
+    return [
+        r"\par\vspace{8pt}",
+        r"\begin{minipage}[c]{0.46\linewidth}\centering",
+        scratch_blocks(algo, scale=0.7),
+        r"\end{minipage}\hfill",
+        r"\begin{minipage}[c]{0.5\linewidth}\centering",
+        _trace_table(cols, rows, fill=fill),
+        r"\end{minipage}",
+    ]
+
+
+def _scratch_centered(algo) -> str:
+    return r"\begin{center}" + scratch_blocks(algo, scale=0.82) + r"\end{center}"
+
+
 def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
     parts = []
     if problem.kind == "trace" or (problem.kind == "outputs" and problem.inputs):
@@ -130,6 +154,7 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
         parts.append(r"\Needspace*{0.5\textheight}")
     parts.append(r"\subsection*{Problem %d.}" % idx)
     algo = problem.algo
+    noun = "Scratch program" if problem.present == "scratch" else "algorithm"
 
     if problem.kind == "draw":
         predict = problem.cases  # inputs to predict the output for, before drawing
@@ -166,10 +191,13 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
         cols, rows, outputs = run(algo, problem.inputs)
         if problem.description:  # written use case before the flowchart
             parts.append(r"\begin{quote}\itshape %s\end{quote}" % _esc(problem.description))
-        parts.append(_trace_instruction(problem.inputs))
+        parts.append(_trace_instruction(problem.inputs, noun))
         if problem.note:
             parts.append(r"\par\vspace{2pt}\textit{%s}" % _esc(problem.note))
-        parts += _fig_beside_trace(fig_path, cols, rows, fill=answer)
+        if problem.present == "scratch":
+            parts += _scratch_beside_trace(algo, cols, rows, fill=answer)
+        else:
+            parts += _fig_beside_trace(fig_path, cols, rows, fill=answer)
         if answer:
             shown = ", ".join(_esc(o) for o in outputs)
             parts.append(r"\textbf{Output:}\quad %s" % (shown or r"\textit{(none)}"))
@@ -180,17 +208,23 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
         has_trace = bool(problem.inputs)
         n_parts = 1 + has_trace + bool(problem.followup)
         labels = iter([r"(i)~", r"(ii)~", r"(iii)~"] if n_parts > 1 else ["", "", ""])
-        if has_trace:  # warm-up: trace one input, flowchart beside the table
+        if has_trace:  # warm-up: trace one input, program beside the table
             cols, rows, _ = run(algo, problem.inputs)
-            parts.append(next(labels) + _trace_instruction(problem.inputs))
+            parts.append(next(labels) + _trace_instruction(problem.inputs, noun))
             if problem.note:
                 parts.append(r"\par\vspace{2pt}\textit{%s}" % _esc(problem.note))
-            parts += _fig_beside_trace(fig_path, cols, rows, fill=answer)
+            if problem.present == "scratch":
+                parts += _scratch_beside_trace(algo, cols, rows, fill=answer)
+            else:
+                parts += _fig_beside_trace(fig_path, cols, rows, fill=answer)
             parts.append(r"\par\vspace{8pt}")
+        elif problem.present == "scratch":
+            parts.append(_scratch_centered(algo))
         else:
             parts.append(_fig(fig_path))
+        follow = "Scratch program" if problem.present == "scratch" else "flowchart"
         parts.append(next(labels)
-                     + r"For each input below, follow the flowchart and write the output.")
+                     + r"For each input below, follow the %s and write the output." % follow)
         if problem.note and not has_trace:
             parts.append(r"\par\vspace{2pt}\textit{%s}" % _esc(problem.note))
         parts.append(r"\par\vspace{4pt}")

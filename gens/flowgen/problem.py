@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from .algo import Algorithm
 
 KINDS = ("trace", "draw", "outputs")
+PRESENTATIONS = ("flowchart", "scratch")  # how a trace/outputs problem is shown
 
 
 @dataclass
@@ -25,21 +26,26 @@ class Problem:
     description: str = ""  # for "draw": plain-English statement instead of pseudocode
     example: str = ""   # for "draw": a worked example shown above the predict table
     reveal: str = ""    # for "trace": real-world note shown AFTER the trace table
+    present: str = "flowchart"  # show the program as a flowchart, or as Scratch blocks
 
     def __post_init__(self):
         assert self.kind in KINDS, f"unknown kind {self.kind!r}"
+        assert self.present in PRESENTATIONS, f"unknown presentation {self.present!r}"
 
 
 def TRACE(algo: Algorithm, inputs: dict, note: str = "", description: str = "",
-          reveal: str = "") -> Problem:
-    """Trace the flowchart. `description` is an optional written use case /
-    plain-English statement of the algorithm shown before the flowchart.
+          reveal: str = "", present: str = "flowchart") -> Problem:
+    """Trace the program. `description` is an optional written use case /
+    plain-English statement of the algorithm shown before it.
+
+    `present="scratch"` shows the program as Scratch blocks instead of a
+    flowchart (the student traces the Scratch script).
 
     `reveal` is shown AFTER the trace table — use it to name the real-world
     algorithm the flowchart implements only once the student has traced it
     (so the flowchart is presented neutrally, then explained at the end)."""
     return Problem(algo, "trace", inputs, note=note, description=description,
-                   reveal=reveal)
+                   reveal=reveal, present=present)
 
 
 def DRAW(algo: Algorithm, description: str = "", predict: list | None = None,
@@ -57,8 +63,11 @@ def DRAW(algo: Algorithm, description: str = "", predict: list | None = None,
 
 
 def OUTPUTS(algo: Algorithm, cases: list, followup: str = "", note: str = "",
-            trace: dict | None = None) -> Problem:
+            trace: dict | None = None, present: str = "flowchart") -> Problem:
     """Find the output for each input case. `trace` adds a warm-up part: trace
-    the algorithm (with a trace table) for that one input first."""
+    the algorithm (with a trace table) for that one input first.
+
+    `present="scratch"` shows the program as Scratch blocks instead of a
+    flowchart."""
     return Problem(algo, "outputs", inputs=trace or {}, cases=cases,
-                   followup=followup, note=note)
+                   followup=followup, note=note, present=present)

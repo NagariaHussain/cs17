@@ -42,9 +42,12 @@ def main(argv=None):
 
     rendered = []
     for i, p in enumerate(problems, 1):
+        if getattr(p, "present", "flowchart") == "scratch":
+            rendered.append((p, None))  # shown as Scratch blocks; no flowchart figure
+            continue
         render(p.algo, str(figs / f"p{i:02d}"))  # pdf + png + svg
         rendered.append((p, f"figs/p{i:02d}"))
-    print(f"rendered {len(rendered)} flowcharts -> {figs}")
+    print(f"rendered {sum(1 for _, f in rendered if f)} flowcharts -> {figs}")
 
     for suffix, key in (("", False), ("-answers", True)):
         tex = latex.build_document(rendered, title=title, answer_key=key)
