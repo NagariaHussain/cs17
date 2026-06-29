@@ -11,11 +11,12 @@ WS7 := worksheets/worksheet7_loops
 WS8 := worksheets/worksheet8_flowcharts_intermediate
 WS9 := worksheets/worksheet9_logic_and_flowcharts
 WS10 := worksheets/worksheet10_drawing_flowcharts
+WS11 := worksheets/worksheet11_coordinate_system
 
-.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing pdfs setup clean
+.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords pdfs setup clean
 
 # Build every worksheet, then collect all PDFs into pdfs/  ->  make
-all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing pdfs
+all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords pdfs
 
 boolean:
 	$(PY) -m gens.boolgen.build $(WS1)/worksheet_1_boolean_algebra.py --out $(WS1)/build
@@ -50,6 +51,12 @@ mixed:
 # student draws the flowchart (the answer key derives the flowchart from source).
 drawing:
 	$(PY) -m gens.flowgen.build $(WS10)/worksheet_10_drawing_flowcharts.py --out $(WS10)/build
+
+# Worksheet 11 primes the Scratch stage coordinate system: read/plot points on a
+# grid centred at (0,0), then write turtle instructions (go to / change x / change
+# y / move / turn) to hit a target. Built by the turtlegen generator (inline TikZ).
+coords:
+	$(PY) -m gens.turtlegen.build $(WS11)/worksheet_11_coordinate_system.py --out $(WS11)/build
 
 # Gather every PDF into pdfs/ as symlinks (build/ holds figures + .tex), split
 # into pdfs/sheets/ (the worksheets) and pdfs/answer_keys/ (the -answers PDFs)

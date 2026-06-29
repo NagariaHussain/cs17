@@ -12,18 +12,20 @@ set -e
 staged=$(git diff --cached --name-only)
 match() { echo "$staged" | grep -qE "$1"; }
 
-bld_boolean=false; bld_flow=false; bld_binary=false; bld_hex=false; bld_mixed=false; bld_draw=false
+bld_boolean=false; bld_flow=false; bld_binary=false; bld_hex=false; bld_mixed=false; bld_draw=false; bld_coords=false
 
-match '^gens/wsbase\.py$'  && { bld_boolean=true; bld_flow=true; bld_binary=true; bld_hex=true; bld_mixed=true; bld_draw=true; }
+match '^gens/wsbase\.py$'  && { bld_boolean=true; bld_flow=true; bld_binary=true; bld_hex=true; bld_mixed=true; bld_draw=true; bld_coords=true; }
 match '^gens/boolgen/'     && { bld_boolean=true; bld_binary=true; bld_hex=true; bld_mixed=true; }
 match '^gens/flowgen/'     && { bld_flow=true;    bld_binary=true; bld_hex=true; bld_mixed=true; bld_draw=true; }
 match '^gens/bingen/'      && { bld_binary=true;  bld_hex=true; }
+match '^gens/turtlegen/'   && bld_coords=true
 match '/worksheet_1_boolean_algebra\.py$' && bld_boolean=true
 match '/worksheet_2_flowcharts\.py$'      && bld_flow=true
 match '/worksheet_3_binary\.py$'        && bld_binary=true
 match '/worksheet_4_hexadecimal\.py$'    && bld_hex=true
 match '/worksheet_9_logic_and_flowcharts\.py$' && bld_mixed=true
 match '/worksheet_10_drawing_flowcharts\.py$'  && bld_draw=true
+match '/worksheet_11_coordinate_system\.py$'   && bld_coords=true
 
 WS1=worksheets/worksheet1_boolean_algebra
 WS2=worksheets/worksheet2_flowcharts
@@ -31,6 +33,7 @@ WS3=worksheets/worksheet3_binary
 WS4=worksheets/worksheet4_hexadecimal
 WS9=worksheets/worksheet9_logic_and_flowcharts
 WS10=worksheets/worksheet10_drawing_flowcharts
+WS11=worksheets/worksheet11_coordinate_system
 
 rebuilt=false
 $bld_boolean && { echo "pre-commit: rebuilding boolean worksheet";   make boolean;   git add "$WS1/build"; rebuilt=true; }
@@ -39,6 +42,7 @@ $bld_binary  && { echo "pre-commit: rebuilding binary worksheet";    make binary
 $bld_hex     && { echo "pre-commit: rebuilding hex worksheet";       make hex;       git add "$WS4/build"; rebuilt=true; }
 $bld_mixed   && { echo "pre-commit: rebuilding mixed worksheet";     make mixed;     git add "$WS9/build"; rebuilt=true; }
 $bld_draw    && { echo "pre-commit: rebuilding drawing worksheet";   make drawing;   git add "$WS10/build"; rebuilt=true; }
+$bld_coords  && { echo "pre-commit: rebuilding coordinate worksheet"; make coords;   git add "$WS11/build"; rebuilt=true; }
 
 # Refresh the pdfs/ symlink farm whenever any sheet was rebuilt.
 $rebuilt && { make pdfs >/dev/null; git add pdfs; }
