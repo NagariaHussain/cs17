@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scratch Ground Leapfrog</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#182031; --ink:#e8edf6; --muted:#93a1bd;
+    --a:#43c47a; --b:#3d8bff; --stage:#ffd34d; --bad:#ff5964;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    padding:18px;max-width:1040px;margin:0 auto}
+  h1{font-size:20px;margin:0 0 4px}
+  p.sub{color:var(--muted);margin:0 0 14px}
+  canvas{width:100%;height:auto;display:block;border-radius:10px;background:#0a0e17}
+  .wrap{background:var(--panel);border-radius:12px;padding:12px;margin-bottom:14px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0 4px}
+  button{background:#243149;color:var(--ink);border:1px solid #32405c;border-radius:8px;
+    padding:8px 14px;font-size:14px;cursor:pointer}
+  button:hover{background:#2d3d5a}
+  button.primary{background:var(--stage);color:#1a1400;border-color:var(--stage);font-weight:600}
+  label.ctl{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:13px}
+  input[type=range]{width:120px}
+  .hud{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+  .card{background:#111826;border:1px solid #26314a;border-radius:10px;padding:10px 12px}
+  .card .k{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  .card .v{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+  .dotA{color:var(--a)} .dotB{color:var(--b)} .bad{color:var(--bad)}
+  .log{height:96px;overflow:auto;background:#0a0e17;border-radius:8px;padding:8px 10px;
+    font:12px/1.5 ui-monospace,Menlo,monospace;color:var(--muted);margin-top:10px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
+  .sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px}
+  .note{font-size:13px;color:var(--muted);margin-top:10px}
+  .note b{color:var(--ink)}
+  code{background:#0a0e17;padding:1px 6px;border-radius:5px;color:#e8edf6}
+</style>
+</head>
+<body>
+  <h1>Ground leapfrog — two 480-wide tiles</h1>
+  <p class="sub">Stage shows only x&nbsp;−240…240. Each tile is 480 wide. Watch how one refills the window while the other slides off.</p>
+
+  <div class="wrap">
+    <canvas id="cv" width="960" height="300"></canvas>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--a)"></span>Tile&nbsp;A (starts x=0)</span>
+      <span><span class="sw" style="background:var(--b)"></span>Tile&nbsp;B (starts x=480)</span>
+      <span><span class="sw" style="background:var(--stage)"></span>STAGE = what player sees</span>
+      <span>Faded = off-screen (still exists, just clipped)</span>
+    </div>
+
+    <div class="controls">
+      <button id="play" class="primary">⏸ Pause</button>
+      <button id="step">Step ▸</button>
+      <button id="reset">Reset</button>
+      <label class="ctl">speed <input id="spd" type="range" min="1" max="14" value="6"><span id="spdv">6</span></label>
+      <label class="ctl">wrap rule
+        <select id="rule" style="background:#243149;color:#e8edf6;border:1px solid #32405c;border-radius:8px;padding:6px">
+          <option value="seam">change x by 960 (seamless)</option>
+          <option value="bad">set x to 480 (has gap)</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="hud">
+      <div class="card"><div class="k">Tile A center</div><div class="v dotA" id="ax">0</div></div>
+      <div class="card"><div class="k">Tile B center</div><div class="v dotB" id="bx">480</div></div>
+      <div class="card"><div class="k">Gap between tiles</div><div class="v" id="gap">480</div></div>
+      <div class="card"><div class="k">Window covered?</div><div class="v" id="cov">yes</div></div>
+    </div>
+    <div class="log" id="log"></div>
+  </div>
+
+  <p class="note"><b>Key idea:</b> centers ARE different (0 and 480) — that's the point. Tile at center 0 covers −240…240 = exactly the visible stage. Tile at center 480 covers 240…720 = parked off the right, waiting. Both slide left together. When a tile's right edge leaves the stage (center &lt; −480), it jumps ahead of its partner (<code>change x by 960</code>) and becomes the new "parked" tile. Endless belt.</p>
+  <p class="note">Flip <b>wrap rule → set x to 480</b> and watch the <span class="bad">red gap</span> flicker across: snapping to a fixed 480 loses the few px of overshoot, so spacing drifts to 486 and a thin seam appears. <code>change x by 960</code> keeps them exactly 480 apart forever.</p>
+
+<script>
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+const W=cv.width, H=cv.height;
+// world: show scratch x -720..720 across canvas
+const WORLD=1440, scale=W/WORLD, TILE=480, HALF=TILE/2;
+const sx = x => W/2 + x*scale;            // scratch x -> canvas px
+const GROUND_TOP=170, GROUND_H=110;
+
+let A, B, speed=6, playing=true, rule='seam', flash={A:0,B:0};
+function reset(){ A=0; B=480; log('reset — A=0  B=480  (480 apart)'); draw(); updateHud(); }
+reset();
+
+function log(m){ const el=document.getElementById('log');
+  el.innerHTML = m+'<br>'+el.innerHTML; }
+
+function wrapTile(name,val){
+  if(val < -480){
+    flash[name]=8;
+    if(rule==='seam'){ const nv=val+960; log(name+': center '+val.toFixed(0)+' &lt; −480 → change x by 960 → '+nv.toFixed(0)); return nv; }
+    else            { log(name+': center '+val.toFixed(0)+' &lt; −480 → set x to 480'); return 480; }
+  }
+  return val;
+}
+
+function tick(){
+  A-=speed; B-=speed;
+  A=wrapTile('A',A); B=wrapTile('B',B);
+  if(flash.A>0)flash.A--; if(flash.B>0)flash.B--;
+}
+
+// draw one 480-wide tile centered at scratch x=cx
+function drawTile(cx,color,letter,fl){
+  const left=sx(cx-HALF), w=TILE*scale;
+  ctx.fillStyle=color; ctx.fillRect(left,GROUND_TOP,w,GROUND_H);
+  // stripes so motion is visible
+  ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=2;
+  for(let u=-HALF+40;u<HALF;u+=40){ const px=sx(cx+u);
+    ctx.beginPath(); ctx.moveTo(px,GROUND_TOP+8); ctx.lineTo(px,GROUND_TOP+GROUND_H); ctx.stroke(); }
+  // tile border + big letter
+  ctx.strokeStyle= fl>0 ? '#fff' : 'rgba(0,0,0,.35)';
+  ctx.lineWidth= fl>0 ? 4 : 2;
+  ctx.strokeRect(left,GROUND_TOP,w,GROUND_H);
+  ctx.fillStyle='rgba(255,255,255,.85)'; ctx.font='bold 30px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(letter, sx(cx), GROUND_TOP+34);
+  // center tick + label
+  ctx.fillStyle='rgba(0,0,0,.55)';
+  ctx.fillRect(sx(cx)-1,GROUND_TOP,2,14);
+  ctx.font='12px ui-monospace,monospace'; ctx.fillStyle='rgba(255,255,255,.9)';
+  ctx.fillText('x='+Math.round(cx), sx(cx), GROUND_TOP+GROUND_H-12);
+}
+
+function covered(){
+  // union of the two tiles must contain [-240,240]
+  const iv=[[A-HALF,A+HALF],[B-HALF,B+HALF]].sort((p,q)=>p[0]-q[0]);
+  let reach=iv[0][0]; let ok = reach<=-240;
+  for(const [l,r] of iv){ if(l>reach+0.001){ ok=false; } reach=Math.max(reach,r); }
+  return ok && reach>=240;
+}
+
+function draw(){
+  // sky
+  const g=ctx.createLinearGradient(0,0,0,GROUND_TOP);
+  g.addColorStop(0,'#141c2e'); g.addColorStop(1,'#1d2740');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,GROUND_TOP);
+  ctx.fillStyle='#0a0e17'; ctx.fillRect(0,GROUND_TOP+GROUND_H,W,H-GROUND_TOP-GROUND_H);
+
+  drawTile(A,'#43c47a','A',flash.A);
+  drawTile(B,'#3d8bff','B',flash.B);
+
+  // dim the OFF-STAGE regions (left of -240, right of 240)
+  ctx.fillStyle='rgba(10,14,23,.72)';
+  ctx.fillRect(0,0,sx(-240),H);
+  ctx.fillRect(sx(240),0,W-sx(240),H);
+
+  // stage window frame
+  ctx.strokeStyle='#ffd34d'; ctx.lineWidth=3;
+  ctx.strokeRect(sx(-240),6,sx(240)-sx(-240),H-12);
+  ctx.fillStyle='#ffd34d'; ctx.font='bold 12px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('STAGE — player sees x −240 … 240', sx(0), 22);
+
+  // fixed dino for reference (sits still; ground scrolls under it)
+  const dx=sx(-120);
+  ctx.fillStyle='#e8edf6';
+  ctx.fillRect(dx-14,GROUND_TOP-42,28,42);
+  ctx.fillRect(dx+6,GROUND_TOP-52,16,16);
+  ctx.fillStyle='#0a0e17'; ctx.fillRect(dx+15,GROUND_TOP-48,4,4);
+
+  // gap indicator: if not covered, mark uncovered stage columns red
+  if(!covered()){
+    ctx.fillStyle='rgba(255,89,100,.55)';
+    for(let x=-240;x<=240;x+=4){
+      const inA = x>=A-HALF&&x<=A+HALF, inB=x>=B-HALF&&x<=B+HALF;
+      if(!inA&&!inB) ctx.fillRect(sx(x),GROUND_TOP,4,GROUND_H);
+    }
+  }
+}
+
+function updateHud(){
+  document.getElementById('ax').textContent=Math.round(A);
+  document.getElementById('bx').textContent=Math.round(B);
+  const gap=Math.abs(A-B), gEl=document.getElementById('gap');
+  gEl.textContent=Math.round(gap);
+  gEl.className='v'+(Math.abs(gap-480)>0.5?' bad':'');
+  const c=covered(), cEl=document.getElementById('cov');
+  cEl.textContent=c?'yes':'GAP!'; cEl.className='v'+(c?'':' bad');
+}
+
+let acc=0, last=null;
+function loop(t){
+  if(last==null)last=t; const dt=t-last; last=t;
+  if(playing){ acc+=dt; while(acc>=33){ tick(); acc-=33; } }  // ~30fps like scratch
+  draw(); updateHud();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+document.getElementById('play').onclick=e=>{ playing=!playing;
+  e.target.textContent=playing?'⏸ Pause':'▶ Play'; };
+document.getElementById('step').onclick=()=>{ tick(); draw(); updateHud(); };
+document.getElementById('reset').onclick=reset;
+document.getElementById('spd').oninput=e=>{ speed=+e.target.value;
+  document.getElementById('spdv').textContent=speed; };
+document.getElementById('rule').onchange=e=>{ rule=e.target.value;
+  log('wrap rule → '+(rule==='seam'?'change x by 960 (seamless)':'set x to 480 (has gap)')); };
+</script>
+</body>
+</html>
