@@ -18,12 +18,14 @@ from .script import Block, CBlock, Script
 
 # category -> the scratch3 colour macro for an ordinary stack block
 _CAT = {
-    "event":   r"\blockinit",
-    "move":    r"\blockmove",
-    "look":    r"\blocklook",
-    "sound":   r"\blocksound",
-    "control": r"\blockcontrol",
-    "sensing": r"\blocksensing",
+    "event":     r"\blockinit",     # an event hat (when ... clicked / received)
+    "broadcast": r"\blockevent",    # an event-coloured *stack* block (broadcast)
+    "move":      r"\blockmove",
+    "look":      r"\blocklook",
+    "sound":     r"\blocksound",
+    "control":   r"\blockcontrol",
+    "sensing":   r"\blocksensing",
+    "data":      r"\blockvariable",
 }
 
 
@@ -43,6 +45,12 @@ def _emit(blocks: list) -> list[str]:
                 # \blockrepeat takes the count as its first argument, body second
                 count = b.label[len("repeat "):]  # the \ovalnum{...} script.py built
                 lines.append(r"\blockrepeat{%s}{" % count)
+                lines += _indent(_emit(b.body))
+                lines.append("}")
+            elif b.kind == "repeatuntil":
+                # \blockrepeatuntil is defined in the preamble (latex.py) the same
+                # way \blockforever is — the package has no public repeat-until.
+                lines.append(r"\blockrepeatuntil{%s}{" % b.label)
                 lines += _indent(_emit(b.body))
                 lines.append("}")
             elif b.kind == "if":
@@ -69,5 +77,14 @@ def render_script(s: Script, scale: float = 1.0) -> str:
     lines = [r"\begin{scratch}[%.2f]" % scale,
              r"%s{%s}" % (_CAT[s.hat.category], s.hat.label)]
     lines += _emit(s.body)
+    lines.append(r"\end{scratch}")
+    return "\n".join(lines)
+
+
+def render_blocks(blocks: list, scale: float = 1.0) -> str:
+    """A `scratch` environment for a loose stack of blocks with no hat — e.g. a
+    single `if` shown on its own, as boxgen does for the grounded-check."""
+    lines = [r"\begin{scratch}[%.2f]" % scale]
+    lines += _emit(blocks)
     lines.append(r"\end{scratch}")
     return "\n".join(lines)

@@ -7,35 +7,8 @@ of points), so the picture and the stated answer come from the same source.
 
 from __future__ import annotations
 
+from ..gridframe import SCALE, blank_grid, frame as _frame
 from .program import TraceResult
-
-SCALE = 0.52
-
-
-def _frame(extent: int, scale: float) -> list[str]:
-    """Grid + axes + origin + even-numbered tick labels. Caller adds content
-    and the closing \\end{tikzpicture}."""
-    e = extent
-    out = [r"\begin{tikzpicture}[scale=%g, >=Stealth, line join=round, "
-           r"baseline=(current bounding box.center)]" % scale]
-    out.append(r"\draw[step=1, black!15, very thin] (%d,%d) grid (%d,%d);"
-               % (-e, -e, e, e))
-    out.append(r"\draw[->, thick] (%g,0) -- (%g,0) node[right] {$x$};"
-               % (-e - 0.5, e + 0.5))
-    out.append(r"\draw[->, thick] (0,%g) -- (0,%g) node[above] {$y$};"
-               % (-e - 0.5, e + 0.5))
-    for i in range(-e, e + 1):
-        if i == 0 or i % 2:
-            continue
-        out.append(r"\node[below, font=\tiny] at (%d,0) {%d};" % (i, i))
-        out.append(r"\node[left, font=\tiny] at (0,%d) {%d};" % (i, i))
-    out.append(r"\node[below left, font=\tiny] at (0,0) {0};")
-    return out
-
-
-def blank_grid(extent: int, scale: float = SCALE) -> str:
-    """An empty grid — what the student draws on."""
-    return "\n".join(_frame(extent, scale) + [r"\end{tikzpicture}"])
 
 
 def _start_marker(out: list[str], x, y):

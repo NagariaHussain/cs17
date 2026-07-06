@@ -18,6 +18,10 @@ _PREAMBLE = wsbase.preamble(r"""\usepackage{scratch3}
 % capped, no-bottom-nub forever block; build it from the internal C-block macro
 % scr_blockloop{text}{body}{else}{infinite}{arrow} with infinite + arrow on.
 \newcommand\blockforever[1]{\csname scr_blockloop\endcsname{forever}{#1}{}11}
+% repeat until <cond>: the package ships \blockrepeat (counted) but no public
+% repeat-until, so build it from the same internal C-block macro — a finite loop
+% (no infinite flag, no loop arrow) whose header carries the boolean hexagon.
+\newcommand\blockrepeatuntil[2]{\csname scr_blockloop\endcsname{repeat until #1}{#2}{}00}
 % a block name in prose: a compact grey chip. \fboxsep is trimmed so a row of
 % several chips stays inline-friendly, and \emergencystretch lets TeX absorb a
 % chip that lands at the margin (the chips are unbreakable boxes) instead of
@@ -61,21 +65,28 @@ _INTRO = (
     r"\item The \textbf{code area} (right) is where you join blocks together."
     r"\end{itemize}\vspace{2pt}\end{minipage}}")
 
-# the colour groups this sheet uses, named so the student can find each block
-# fast. The colours match the official Scratch 3.0 category palette.
+# every block group the generator can show, in canonical Scratch order, named so
+# the student can find each block fast. The colour names match the official
+# Scratch 3.0 palette. A worksheet shows only the subset it uses (PALETTE in its
+# module); DEFAULT_PALETTE is Scratch A's basic set.
 _PALETTE = [
-    ("Motion",  "blue",   "Move the sprite: move, turn, go to, point, change x or y."),
-    ("Looks",   "purple", "Change how the sprite looks: say, costume, size."),
-    ("Sound",   "pink",   "Play a sound."),
-    ("Events",  "yellow", "Hat blocks that start a script: green flag, key pressed, sprite clicked."),
-    ("Control", "orange", "Choose when and how often blocks run: wait, forever, repeat."),
+    ("Motion",    "blue",        "Move the sprite: move, turn, go to, point towards, change x or y."),
+    ("Looks",     "purple",      "Change how the sprite looks: say, costume, size, backdrop."),
+    ("Sound",     "pink",        "Play a sound."),
+    ("Events",    "yellow",      "Start a script (green flag, key, click, when I receive) and broadcast messages."),
+    ("Control",   "orange",      "Choose when and how often blocks run: wait, forever, repeat, if, stop."),
+    ("Sensing",   "light blue",  "Ask about the world: touching?, key pressed?, mouse, ask and answer."),
+    ("Operators", "green",       "Do maths and comparisons: plus, pick random, less-than, equals, more-than, and/or."),
+    ("Variables", "dark orange", "Remember a value like score: set, change, and show a variable."),
 ]
+DEFAULT_PALETTE = ["Motion", "Looks", "Sound", "Events", "Control"]
 
 
-def _palette() -> str:
+def _palette(names: list | None = None) -> str:
+    names = names or DEFAULT_PALETTE
     rows = "\n".join(
         r"\textbf{%s} & \textit{(%s)} & %s \\" % (name, colour, _esc(desc))
-        for name, colour, desc in _PALETTE)
+        for name, colour, desc in _PALETTE if name in names)
     return (r"\textbf{The block groups you will use.}\quad Each block has a "
             r"colour. The colour tells you which group it is in. Find the colour "
             r"first, then find the block."
@@ -151,7 +162,11 @@ def _activity(idx: int, a: Activity, *, answer: bool) -> str:
 
 
 def build_document(activities, *, title: str, answer_key: bool,
-                   intro: bool = True) -> str:
+                   intro: bool = True, palette: list | None = None,
+                   lead: str | None = None) -> str:
+    """`palette` is the list of block-group names to show in the colour key
+    (defaults to Scratch A's basic set). `lead` replaces the first-time "What is
+    Scratch?" tour with a short recap for later sheets; the colour key still shows."""
     body = [_PREAMBLE, r"\begin{document}", r"\wstitle{%s}" % title]
     if answer_key:
         body.append(r"\textit{Answer key --- finished scripts and challenge "
@@ -159,9 +174,9 @@ def build_document(activities, *, title: str, answer_key: bool,
     else:
         body.append(r"\wsnamefield")
     if intro:
-        body.append(_INTRO)
+        body.append(lead if lead else _INTRO)
         body.append(r"\par\vspace{12pt}")
-        body.append(_palette())
+        body.append(_palette(palette))
         body.append(r"\probrule")
     for i, a in enumerate(activities, 1):
         body.append(_activity(i, a, answer=answer_key))

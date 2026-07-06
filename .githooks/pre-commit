@@ -7,19 +7,24 @@
 # binary/hex sheets (Worksheets 3 & 4) embed boolgen/flowgen revision questions,
 # and the mixed sheet (Worksheet 9) is boolgen-hosted but embeds flowgen traces —
 # so a change to gens/boolgen/ or gens/flowgen/ must rebuild those sheets too.
+# gens/gridframe.py is the grid drawn by BOTH the coordinate sheet (turtlegen) and
+# the anchor sheet (boxgen); and boxgen (Worksheet 16) renders its capstone block
+# with scratchgen, so a scratchgen change rebuilds the anchor sheet too.
 set -e
 
 staged=$(git diff --cached --name-only)
 match() { echo "$staged" | grep -qE "$1"; }
 
-bld_boolean=false; bld_flow=false; bld_binary=false; bld_hex=false; bld_mixed=false; bld_draw=false; bld_coords=false; bld_scratch=false
+bld_boolean=false; bld_flow=false; bld_binary=false; bld_hex=false; bld_mixed=false; bld_draw=false; bld_coords=false; bld_scratch=false; bld_anchors=false
 
-match '^gens/wsbase\.py$'  && { bld_boolean=true; bld_flow=true; bld_binary=true; bld_hex=true; bld_mixed=true; bld_draw=true; bld_coords=true; bld_scratch=true; }
+match '^gens/wsbase\.py$'  && { bld_boolean=true; bld_flow=true; bld_binary=true; bld_hex=true; bld_mixed=true; bld_draw=true; bld_coords=true; bld_scratch=true; bld_anchors=true; }
 match '^gens/boolgen/'     && { bld_boolean=true; bld_binary=true; bld_hex=true; bld_mixed=true; }
 match '^gens/flowgen/'     && { bld_flow=true;    bld_binary=true; bld_hex=true; bld_mixed=true; bld_draw=true; }
 match '^gens/bingen/'      && { bld_binary=true;  bld_hex=true; }
+match '^gens/gridframe\.py$' && { bld_coords=true; bld_anchors=true; }
 match '^gens/turtlegen/'   && bld_coords=true
-match '^gens/scratchgen/'  && bld_scratch=true
+match '^gens/scratchgen/'  && { bld_scratch=true; bld_anchors=true; }
+match '^gens/boxgen/'      && bld_anchors=true
 match '/worksheet_1_boolean_algebra\.py$' && bld_boolean=true
 match '/worksheet_2_flowcharts\.py$'      && bld_flow=true
 match '/worksheet_3_binary\.py$'        && bld_binary=true
@@ -28,6 +33,10 @@ match '/worksheet_9_logic_and_flowcharts\.py$' && bld_mixed=true
 match '/worksheet_10_drawing_flowcharts\.py$'  && bld_draw=true
 match '/worksheet_11_coordinate_system\.py$'   && bld_coords=true
 match '/worksheet_12_scratch_projects\.py$'    && bld_scratch=true
+match '/worksheet_13_scratch_sensing\.py$'     && bld_scratch=true
+match '/worksheet_14_scratch_variables\.py$'   && bld_scratch=true
+match '/worksheet_15_scratch_game\.py$'        && bld_scratch=true
+match '/worksheet_16_anchor_points\.py$'       && bld_anchors=true
 
 WS1=worksheets/worksheet1_boolean_algebra
 WS2=worksheets/worksheet2_flowcharts
@@ -37,6 +46,10 @@ WS9=worksheets/worksheet9_logic_and_flowcharts
 WS10=worksheets/worksheet10_drawing_flowcharts
 WS11=worksheets/worksheet11_coordinate_system
 WS12=worksheets/worksheet12_scratch_projects
+WS13=worksheets/worksheet13_scratch_sensing
+WS14=worksheets/worksheet14_scratch_variables
+WS15=worksheets/worksheet15_scratch_game
+WS16=worksheets/worksheet16_anchor_points
 
 rebuilt=false
 $bld_boolean && { echo "pre-commit: rebuilding boolean worksheet";   make boolean;   git add "$WS1/build"; rebuilt=true; }
@@ -46,7 +59,8 @@ $bld_hex     && { echo "pre-commit: rebuilding hex worksheet";       make hex;  
 $bld_mixed   && { echo "pre-commit: rebuilding mixed worksheet";     make mixed;     git add "$WS9/build"; rebuilt=true; }
 $bld_draw    && { echo "pre-commit: rebuilding drawing worksheet";   make drawing;   git add "$WS10/build"; rebuilt=true; }
 $bld_coords  && { echo "pre-commit: rebuilding coordinate worksheet"; make coords;   git add "$WS11/build"; rebuilt=true; }
-$bld_scratch && { echo "pre-commit: rebuilding scratch-projects worksheet"; make scratch; git add "$WS12/build"; rebuilt=true; }
+$bld_scratch && { echo "pre-commit: rebuilding scratch worksheets (A-D)"; make scratch; git add "$WS12/build" "$WS13/build" "$WS14/build" "$WS15/build"; rebuilt=true; }
+$bld_anchors && { echo "pre-commit: rebuilding anchor-point worksheet"; make anchors; git add "$WS16/build"; rebuilt=true; }
 
 # Refresh the pdfs/ symlink farm whenever any sheet was rebuilt.
 $rebuilt && { make pdfs >/dev/null; git add pdfs; }

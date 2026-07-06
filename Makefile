@@ -13,11 +13,15 @@ WS9 := worksheets/worksheet9_logic_and_flowcharts
 WS10 := worksheets/worksheet10_drawing_flowcharts
 WS11 := worksheets/worksheet11_coordinate_system
 WS12 := worksheets/worksheet12_scratch_projects
+WS13 := worksheets/worksheet13_scratch_sensing
+WS14 := worksheets/worksheet14_scratch_variables
+WS15 := worksheets/worksheet15_scratch_game
+WS16 := worksheets/worksheet16_anchor_points
 
-.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch pdfs setup clean
+.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors pdfs setup clean
 
 # Build every worksheet, then collect all PDFs into pdfs/  ->  make
-all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch pdfs
+all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors pdfs
 
 boolean:
 	$(PY) -m gens.boolgen.build $(WS1)/worksheet_1_boolean_algebra.py --out $(WS1)/build
@@ -59,24 +63,39 @@ drawing:
 coords:
 	$(PY) -m gens.turtlegen.build $(WS11)/worksheet_11_coordinate_system.py --out $(WS11)/build
 
-# Worksheet 12 is a follow-along build sheet: the student opens Scratch and makes
-# small projects (basic blocks, movement, events). Each project's finished script
-# is authored once in scratchgen and rendered via the scratch3 package, so the
-# blocks shown match the prose build steps. Built by the scratchgen generator.
+# Worksheets 12-15 are the follow-along Scratch build sheets (Scratch A-D): the
+# student opens Scratch and builds small projects, ramping from basic blocks
+# (A/12) through sensing & choices (B/13) and variables & score (C/14) to a
+# complete multi-sprite game (D/15). Each finished script is authored once in
+# scratchgen and rendered via the scratch3 package, so the blocks shown match the
+# prose build steps. All four share the generator, so they rebuild together.
 scratch:
 	$(PY) -m gens.scratchgen.build $(WS12)/worksheet_12_scratch_projects.py --out $(WS12)/build
+	$(PY) -m gens.scratchgen.build $(WS13)/worksheet_13_scratch_sensing.py --out $(WS13)/build
+	$(PY) -m gens.scratchgen.build $(WS14)/worksheet_14_scratch_variables.py --out $(WS14)/build
+	$(PY) -m gens.scratchgen.build $(WS15)/worksheet_15_scratch_game.py --out $(WS15)/build
 
-# Gather every PDF into pdfs/ as symlinks (build/ holds figures + .tex), split
-# into pdfs/sheets/ (the worksheets) and pdfs/answer_keys/ (the -answers PDFs)
-# so all worksheets can be browsed from one place.
+# Worksheet 16 bridges Worksheet 11 (points) and the Scratch build sheets: a
+# sprite is not a point but a box, and Scratch pins it to the grid by its centre.
+# The student reads/places/computes the box's corners and edges, then writes the
+# real grounded-check block (feet = y position minus height/2). Built by boxgen,
+# which reuses turtlegen's grid frame (gens/gridframe) and scratchgen's block
+# renderer for the capstone, all inline (TikZ + scratch3).
+anchors:
+	$(PY) -m gens.boxgen.build $(WS16)/worksheet_16_anchor_points.py --out $(WS16)/build
+
+# Gather every PDF into pdfs/ as real copies (build/ holds figures + .tex), split
+# into pdfs/sheets/ (the worksheets) and pdfs/answer_keys/ (the -answers PDFs) so
+# all worksheets can be browsed from one place. We copy rather than symlink so the
+# files are standalone (symlinks break when shared, e.g. uploaded to Telegram).
 pdfs:
 	@mkdir -p pdfs/sheets pdfs/answer_keys
 	@rm -f pdfs/sheets/*.pdf pdfs/answer_keys/*.pdf
 	@for f in worksheets/worksheet*/build/*/*.pdf; do \
 	  [ -e "$$f" ] || continue; \
 	  case "$$f" in \
-	    *-answers.pdf) ln -sf "../../$$f" "pdfs/answer_keys/$$(basename "$$f")" ;; \
-	    *)             ln -sf "../../$$f" "pdfs/sheets/$$(basename "$$f")" ;; \
+	    *-answers.pdf) cp "$$f" "pdfs/answer_keys/$$(basename "$$f")" ;; \
+	    *)             cp "$$f" "pdfs/sheets/$$(basename "$$f")" ;; \
 	  esac; \
 	done
 	@echo "pdfs/sheets:";      ls -1 pdfs/sheets

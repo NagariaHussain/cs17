@@ -7,26 +7,40 @@ to building small projects in Scratch — basic blocks, movement, and events.
 """
 
 from .script import (
-    Block, CBlock, Script, script,
-    when_flag, when_key, when_clicked,
+    Block, CBlock, Expr, Script, script,
+    when_flag, when_key, when_clicked, when_receive,
     move, turn_right, turn_left, goto_xy, glide, point,
+    point_towards, goto, glide_to,
     changex, changey, setx, sety, bounce, set_rotation_style,
     say, say_for, think, show, hide, next_costume, switch_costume,
-    change_size, set_size,
+    switch_backdrop, change_size, set_size,
     play_sound, play_until,
-    wait, forever, repeat,
+    wait, forever, repeat, wait_until, stop_all, if_, ifelse, repeat_until,
+    broadcast, broadcast_wait,
+    set_var, change_var, show_var, hide_var, var,
+    ask, answer, mouse_x, mouse_y, timer, distance_to,
+    touching, touching_color, key_pressed, mouse_down,
+    pick_random, join, add, sub, mul, div, gt, lt, eq, and_, or_, not_,
 )
 from .render import render_script
 from .problem import Activity, BUILD
 
 __all__ = [
-    "Block", "CBlock", "Script", "script",
-    "when_flag", "when_key", "when_clicked",
+    "Block", "CBlock", "Expr", "Script", "script",
+    "when_flag", "when_key", "when_clicked", "when_receive",
     "move", "turn_right", "turn_left", "goto_xy", "glide", "point",
+    "point_towards", "goto", "glide_to",
     "changex", "changey", "setx", "sety", "bounce", "set_rotation_style",
     "say", "say_for", "think", "show", "hide", "next_costume", "switch_costume",
-    "change_size", "set_size",
+    "switch_backdrop", "change_size", "set_size",
     "play_sound", "play_until",
-    "wait", "forever", "repeat",
+    "wait", "forever", "repeat", "wait_until", "stop_all",
+    "if_", "ifelse", "repeat_until",
+    "broadcast", "broadcast_wait",
+    "set_var", "change_var", "show_var", "hide_var", "var",
+    "ask", "answer", "mouse_x", "mouse_y", "timer", "distance_to",
+    "touching", "touching_color", "key_pressed", "mouse_down",
+    "pick_random", "join", "add", "sub", "mul", "div",
+    "gt", "lt", "eq", "and_", "or_", "not_",
     "render_script", "Activity", "BUILD",
 ]

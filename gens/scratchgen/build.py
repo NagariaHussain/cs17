@@ -23,7 +23,7 @@ def _load(path: Path):
     spec = importlib.util.spec_from_file_location("_scratchset", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    return getattr(mod, "TITLE", path.stem), getattr(mod, "ACTIVITIES")
+    return mod
 
 
 def main(argv=None):
@@ -33,13 +33,18 @@ def main(argv=None):
     ap.add_argument("--no-pdf", action="store_true", help="emit .tex but skip Tectonic")
     args = ap.parse_args(argv)
 
-    title, activities = _load(args.set)
+    mod = _load(args.set)
     name = args.set.stem
+    title = getattr(mod, "TITLE", name)
+    activities = mod.ACTIVITIES
+    palette = getattr(mod, "PALETTE", None)
+    lead = getattr(mod, "LEAD", None)
     outdir = args.out / name
     outdir.mkdir(parents=True, exist_ok=True)
 
     for suffix, key in (("", False), ("-answers", True)):
-        tex = latex.build_document(activities, title=title, answer_key=key)
+        tex = latex.build_document(activities, title=title, answer_key=key,
+                                   palette=palette, lead=lead)
         tex_path = outdir / f"{name}{suffix}.tex"
         tex_path.write_text(tex)
         print(f"wrote {tex_path}")
