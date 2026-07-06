@@ -37,6 +37,8 @@ match '/worksheet_13_scratch_sensing\.py$'     && bld_scratch=true
 match '/worksheet_14_scratch_variables\.py$'   && bld_scratch=true
 match '/worksheet_15_scratch_game\.py$'        && bld_scratch=true
 match '/worksheet_16_anchor_points\.py$'       && bld_anchors=true
+match '/worksheet_17_scratch_coins\.py$'       && bld_scratch=true
+match '/worksheet_18_scratch_dodge\.py$'       && bld_scratch=true
 
 WS1=worksheets/worksheet1_boolean_algebra
 WS2=worksheets/worksheet2_flowcharts
@@ -50,6 +52,8 @@ WS13=worksheets/worksheet13_scratch_sensing
 WS14=worksheets/worksheet14_scratch_variables
 WS15=worksheets/worksheet15_scratch_game
 WS16=worksheets/worksheet16_anchor_points
+WS17=worksheets/worksheet17_scratch_coins
+WS18=worksheets/worksheet18_scratch_dodge
 
 rebuilt=false
 $bld_boolean && { echo "pre-commit: rebuilding boolean worksheet";   make boolean;   git add "$WS1/build"; rebuilt=true; }
@@ -59,7 +63,7 @@ $bld_hex     && { echo "pre-commit: rebuilding hex worksheet";       make hex;  
 $bld_mixed   && { echo "pre-commit: rebuilding mixed worksheet";     make mixed;     git add "$WS9/build"; rebuilt=true; }
 $bld_draw    && { echo "pre-commit: rebuilding drawing worksheet";   make drawing;   git add "$WS10/build"; rebuilt=true; }
 $bld_coords  && { echo "pre-commit: rebuilding coordinate worksheet"; make coords;   git add "$WS11/build"; rebuilt=true; }
-$bld_scratch && { echo "pre-commit: rebuilding scratch worksheets (A-D)"; make scratch; git add "$WS12/build" "$WS13/build" "$WS14/build" "$WS15/build"; rebuilt=true; }
+$bld_scratch && { echo "pre-commit: rebuilding scratch worksheets (A-F)"; make scratch; git add "$WS12/build" "$WS13/build" "$WS14/build" "$WS15/build" "$WS17/build" "$WS18/build"; rebuilt=true; }
 $bld_anchors && { echo "pre-commit: rebuilding anchor-point worksheet"; make anchors; git add "$WS16/build"; rebuilt=true; }
 
 # Refresh the pdfs/ symlink farm whenever any sheet was rebuilt.

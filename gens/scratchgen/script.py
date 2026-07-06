@@ -86,6 +86,17 @@ class CBlock:
     body2: list = field(default_factory=list)   # the else branch, for 'ifelse'
 
 
+@dataclass
+class Gap:
+    """A "your turn" hole in the script: on the worksheet it draws a grey
+    placeholder block carrying `hint` (what the student must add, in plain words);
+    on the answer key it renders `real` (the block(s) that belong there) instead.
+    A gap stands in for one or more stack blocks, or a whole C-block, at a single
+    slot in a stack - the missing piece the student drags in themselves."""
+    hint: str           # plain-words goal, e.g. "add 1 to the score"
+    real: list          # the Block/CBlock(s) shown filled in on the answer key
+
+
 # ---- event hats (every script starts with one) ------------------------------
 
 def when_flag() -> Block:
@@ -261,20 +272,29 @@ def stop_all() -> Block:
     return Block("control", r"stop %s" % _menu("all"))
 
 
+def _condlabel(cond):
+    """The header slot of an if / repeat-until. A `Gap` cond stays a Gap so
+    render.py can resolve it per document (a grey "your turn" hexagon on the
+    worksheet, the real boolean on the key); anything else is stringified now, as
+    before. This is what lets the `if` shell show while its test is left blank."""
+    return cond if isinstance(cond, Gap) else str(cond)
+
+
 def if_(cond, *body) -> CBlock:
     """if <cond> then [body] — a C-block whose body runs once when `cond` is true.
-    `cond` is a boolean hexagon (see `touching`, `gt`, ...)."""
-    return CBlock("if", str(cond), list(body))
+    `cond` is a boolean hexagon (see `touching`, `gt`, ...), or a `gap(...)` to
+    leave the test blank for the student while still drawing the `if` shell."""
+    return CBlock("if", _condlabel(cond), list(body))
 
 
 def ifelse(cond, then, orelse) -> CBlock:
     """if <cond> then [then] else [orelse] — `then` and `orelse` are block lists."""
-    return CBlock("ifelse", str(cond), list(then), list(orelse))
+    return CBlock("ifelse", _condlabel(cond), list(then), list(orelse))
 
 
 def repeat_until(cond, *body) -> CBlock:
     """repeat until <cond> [body] — loop until the boolean hexagon `cond` is true."""
-    return CBlock("repeatuntil", str(cond), list(body))
+    return CBlock("repeatuntil", _condlabel(cond), list(body))
 
 
 # ---- events: broadcast (a stack block, not a hat) ----------------------------
@@ -401,6 +421,16 @@ def or_(a, b) -> Expr:
 
 def not_(a) -> Expr:
     return Expr(r"\booloperator{not %s}" % a)
+
+
+# ---- a "your turn" gap the student fills in ----------------------------------
+
+def gap(hint: str, *real) -> Gap:
+    """A hole in the script for the student to fill. `hint` is the plain-words
+    goal shown on the worksheet placeholder; `real` is the block(s) that belong
+    there, shown only on the answer key: `gap("add 1 to the score",
+    change_var("score", 1))`."""
+    return Gap(hint, list(real))
 
 
 # ---- the script container ----------------------------------------------------

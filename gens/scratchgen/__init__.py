@@ -7,11 +7,12 @@ to building small projects in Scratch — basic blocks, movement, and events.
 """
 
 from .script import (
-    Block, CBlock, Expr, Script, script,
+    Block, CBlock, Gap, Expr, Script, script, gap,
     when_flag, when_key, when_clicked, when_receive,
     move, turn_right, turn_left, goto_xy, glide, point,
     point_towards, goto, glide_to,
     changex, changey, setx, sety, bounce, set_rotation_style,
+    x_position, y_position, direction,
     say, say_for, think, show, hide, next_costume, switch_costume,
     switch_backdrop, change_size, set_size,
     play_sound, play_until,
@@ -26,11 +27,12 @@ from .render import render_script
 from .problem import Activity, BUILD
 
 __all__ = [
-    "Block", "CBlock", "Expr", "Script", "script",
+    "Block", "CBlock", "Gap", "Expr", "Script", "script", "gap",
     "when_flag", "when_key", "when_clicked", "when_receive",
     "move", "turn_right", "turn_left", "goto_xy", "glide", "point",
     "point_towards", "goto", "glide_to",
     "changex", "changey", "setx", "sety", "bounce", "set_rotation_style",
+    "x_position", "y_position", "direction",
     "say", "say_for", "think", "show", "hide", "next_costume", "switch_costume",
     "switch_backdrop", "change_size", "set_size",
     "play_sound", "play_until",

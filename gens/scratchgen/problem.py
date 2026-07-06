@@ -31,18 +31,23 @@ class Activity:
     script_intro: str = ""                       # line above the rendered script(s)
     tasks: list = field(default_factory=list)    # (instruction, expected result) - result in key
     note: str = ""                               # an aside / tip
+    stack: bool = False                          # force full-width, one-per-row scripts
 
 
 def BUILD(title: str, *, goal: str, steps: list, scripts: list | Script,
           setup: str = "", new_blocks: list | None = None,
           script_intro: str = "When you are done, your code should look like this:",
-          tasks: list | None = None, note: str = "") -> Activity:
+          tasks: list | None = None, note: str = "", stack: bool = False) -> Activity:
     """One build project. `scripts` may be a single Script or a list of them.
     `tasks` is a list of (instruction, expected result) pairs - the required
     "Your task" work, done in order to extend the project. The instruction shows
-    on the worksheet; the expected result shows only on the answer key."""
+    on the worksheet; the expected result shows only on the answer key. Set
+    `stack=True` to render several scripts full-width, one per row, instead of
+    two to a row - needed when a script carries a wide block (e.g. a long "your
+    turn" gap hint) that would overrun a half-width column."""
     if isinstance(scripts, Script):
         scripts = [scripts]
     return Activity(title=title, goal=goal, setup=setup,
                     new_blocks=new_blocks or [], steps=steps, scripts=scripts,
-                    script_intro=script_intro, tasks=tasks or [], note=note)
+                    script_intro=script_intro, tasks=tasks or [], note=note,
+                    stack=stack)

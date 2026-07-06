@@ -12,6 +12,8 @@ from .render import render_script
 from .problem import Activity
 
 _PREAMBLE = wsbase.preamble(r"""\usepackage{scratch3}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
 \usepackage{enumitem}
 \setdefaultscratch{else word=else}
 % A forever loop: the package exposes \blockrepeat (a counted loop) but not the
@@ -22,6 +24,20 @@ _PREAMBLE = wsbase.preamble(r"""\usepackage{scratch3}
 % repeat-until, so build it from the same internal C-block macro — a finite loop
 % (no infinite flag, no loop arrow) whose header carries the boolean hexagon.
 \newcommand\blockrepeatuntil[2]{\csname scr_blockloop\endcsname{repeat until #1}{#2}{}00}
+% a "your turn" gap: a grey stack block the student must replace with the real
+% block. It reuses the package's own block primitive \scr_normalblock{colour}{text}
+% (the same one \blockmove etc. call) so it stacks with correct puzzle nubs; only
+% the colour is ours. scr_normalblock uses colour "dd" for its outline, so both
+% scrgap and scrgapdd are defined. (\scr_normalblock has an underscore, not a
+% letter in this document, so it is reached via \csname, like \blockforever above.)
+\definecolor{scrgap}{HTML}{8a8a8a}
+\definecolor{scrgapdd}{HTML}{5f5f5f}
+\newcommand\blockgap[1]{\csname scr_normalblock\endcsname{scrgap}{\textbf{?}\ \textit{your turn:} #1}}
+% A "your turn" gap for the test of an if / repeat-until: a grey hexagon so the
+% if SHELL still shows while only its boolean is left blank. \scr_boolbox{colour}
+% {text} is the package's own hexagon primitive (\booloperator etc. call it),
+% reached via \csname because of the underscore.
+\newcommand\boolgap[1]{\csname scr_boolbox\endcsname{scrgap}{\textbf{?}\ #1}}
 % a block name in prose: a compact grey chip. \fboxsep is trimmed so a row of
 % several chips stays inline-friendly, and \emergencystretch lets TeX absorb a
 % chip that lands at the margin (the chips are unbreakable boxes) instead of
@@ -99,19 +115,26 @@ def _palette(names: list | None = None) -> str:
 
 # ---- one activity ------------------------------------------------------------
 
-def _scripts_block(scripts) -> str:
-    """The finished script(s), centred. One sits full width; several are laid two
-    to a row (so a four-arrow project wraps instead of overrunning the page),
-    each with its caption underneath."""
-    one = len(scripts) == 1
-    scale = 0.85 if one else 0.7
-    width = r"\linewidth" if one else r"\dimexpr 0.48\linewidth-4pt"
+def _scripts_block(scripts, answer: bool = False, stack: bool = False) -> str:
+    """The finished script(s), centred. A lone script (or a `stack`ed set) sits
+    full width, one per row; otherwise several are laid two to a row (so a
+    four-arrow project wraps instead of overrunning the page), each with its
+    caption underneath. On the answer key (`answer=True`) any gaps render filled
+    in; on the worksheet they show as "your turn" placeholders. `stack` forces
+    the full-width one-per-row layout even for several scripts - use it when a
+    script holds a wide block (a long gap hint) that a half-width column clips."""
+    full = len(scripts) == 1 or stack
+    scale = 0.85 if full else 0.7
+    width = r"\linewidth" if full else r"\dimexpr 0.48\linewidth-4pt"
     cells = []
     for s in scripts:
         cap = (r"\\[3pt]\footnotesize\itshape %s" % _esc(s.caption)) if s.caption else ""
         cells.append(r"\begin{minipage}[t]{%s}\centering %s%s\end{minipage}"
-                     % (width, render_script(s, scale=scale), cap))
-    rows = [r"\hfill".join(cells[i:i + 2]) for i in range(0, len(cells), 2)]
+                     % (width, render_script(s, scale=scale, answer=answer), cap))
+    if full:
+        rows = cells                                   # each script on its own row
+    else:
+        rows = [r"\hfill".join(cells[i:i + 2]) for i in range(0, len(cells), 2)]
     return (r"\par\vspace{6pt}\begin{center}"
             + r"\par\vspace{12pt}".join(rows) + r"\end{center}")
 
@@ -141,7 +164,7 @@ def _activity(idx: int, a: Activity, *, answer: bool) -> str:
     if a.scripts:
         if a.script_intro:
             parts.append(r"\par\vspace{2pt}%s" % a.script_intro)
-        parts.append(_scripts_block(a.scripts))
+        parts.append(_scripts_block(a.scripts, answer=answer, stack=a.stack))
 
     if a.note:
         parts.append(r"\par\vspace{2pt}\textit{%s}" % a.note)
