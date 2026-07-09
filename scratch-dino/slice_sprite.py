@@ -57,7 +57,12 @@ REGIONS = [
     ("restart_button", 218,130,  577,193, 5),  # 5 rounded restart buttons
 
     # --- ground / decor (optional) ---
-    ("ground",           2,104, 2401,127, 1),  # full horizon line: flat line + pebbles + bumps
+    # Exactly 480 wide = one Scratch stage width. The Dino-Run notes PDF
+    # (misc/dino_game_notes) hinge on a 480-wide tile: two of them leapfrog by
+    # `change x by 960` and wrap at `x < -480`. This window is the flat horizon
+    # (baseline line + small pebbles, no big bumps) so the two tiles butt
+    # together with an invisible seam — the endless-belt illusion the notes teach.
+    ("ground",           2,104,  481,127, 1),  # 480-wide horizon tile: flat line + pebbles
     ("cloud",          174,  2,  257, 28, 1),
     # moon: 7 phases (thin crescent -> full -> thin crescent), unequal widths,
     # cut at the thin "valleys" between crescents. The sparkle is a separate star.
