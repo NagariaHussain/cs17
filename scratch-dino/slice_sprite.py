@@ -57,7 +57,13 @@ REGIONS = [
     ("restart_button", 218,130,  577,193, 5),  # 5 rounded restart buttons
 
     # --- ground / decor (optional) ---
-    ("ground",           2,104, 2401,127, 1),  # full horizon line: flat line + pebbles + bumps
+    # 520 wide = one Scratch stage (480) + 40px overlap. The Dino-Run notes
+    # (misc/dino_game_notes) tile the ground with two of these: they leapfrog by
+    # `change x by 960` and wrap at `x < -480`. Scratch fences sprites (keeps ~15px
+    # on stage), so an exactly-480 tile could never reach -480 and the test would
+    # never fire; 520 lets the centre pass -480 AND the 40px overlap hides the seam.
+    # This window is the flat horizon (baseline + small pebbles, no tall bumps).
+    ("ground",           2,104,  521,127, 1),  # 520-wide horizon tile: flat line + pebbles
     ("cloud",          174,  2,  257, 28, 1),
     # moon: 7 phases (thin crescent -> full -> thin crescent), unequal widths,
     # cut at the thin "valleys" between crescents. The sparkle is a separate star.

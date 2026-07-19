@@ -8,3 +8,8 @@ books.db
 worksheets/**/build/**/*.tex
 worksheets/**/build/**/*.aux
 worksheets/**/build/**/*.log
+
+# misc/*/build/: keep PDFs, drop LaTeX intermediates
+misc/**/build/**/*.tex
+misc/**/build/**/*.aux
+misc/**/build/**/*.log

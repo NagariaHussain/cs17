@@ -39,8 +39,8 @@
 </style>
 </head>
 <body>
-  <h1>Ground leapfrog — two 480-wide tiles</h1>
-  <p class="sub">Stage shows only x&nbsp;−240…240. Each tile is 480 wide. Watch how one refills the window while the other slides off.</p>
+  <h1>Ground leapfrog — two 520-wide tiles (overlap 40)</h1>
+  <p class="sub">Stage shows only x&nbsp;−240…240. Each tile is 520 wide and they sit 480 apart, so they overlap 40px. Watch one refill the window while the other slides off — and note the fence clamp at centre −485.</p>
 
   <div class="wrap">
     <canvas id="cv" width="960" height="300"></canvas>
@@ -59,7 +59,7 @@
       <label class="ctl">wrap rule
         <select id="rule" style="background:#243149;color:#e8edf6;border:1px solid #32405c;border-radius:8px;padding:6px">
           <option value="seam">change x by 960 (seamless)</option>
-          <option value="bad">set x to 480 (has gap)</option>
+          <option value="bad">set x to 480 (less overlap)</option>
         </select>
       </label>
     </div>
@@ -73,14 +73,17 @@
     <div class="log" id="log"></div>
   </div>
 
-  <p class="note"><b>Key idea:</b> centers ARE different (0 and 480) — that's the point. Tile at center 0 covers −240…240 = exactly the visible stage. Tile at center 480 covers 240…720 = parked off the right, waiting. Both slide left together. When a tile's right edge leaves the stage (center &lt; −480), it jumps ahead of its partner (<code>change x by 960</code>) and becomes the new "parked" tile. Endless belt.</p>
-  <p class="note">Flip <b>wrap rule → set x to 480</b> and watch the <span class="bad">red gap</span> flicker across: snapping to a fixed 480 loses the few px of overshoot, so spacing drifts to 486 and a thin seam appears. <code>change x by 960</code> keeps them exactly 480 apart forever.</p>
+  <p class="note"><b>Key idea:</b> two tiles 480 apart (centres 0 and 480), each 520 wide so they overlap 40px. Tile at centre 0 covers −260…260 = the whole stage plus a little; tile at centre 480 covers 220…740 = parked off the right, waiting. Both slide left together. When a tile's centre passes −480 it jumps ahead of its partner (<code>change x by 960</code>) and becomes the new "parked" tile. Endless belt.</p>
+  <p class="note"><b>Why 520 and not 480?</b> Scratch <b>fences</b> every sprite — it never lets one slide fully off the stage, keeping ~15px on. So an exactly-480 tile's centre could never reach −480 and the wrap would <i>never fire</i>. A 520 tile can (its centre reaches −485 before the fence bites), and the 40px overlap hides the seam. Flip <b>wrap rule → set x to 480</b>: with the 40px cushion it still holds at normal speeds — <code>set x</code> just keeps a little <i>less</i> overlap, because it throws away the fence overshoot that <code>change x</code> carries. Crank the speed slider up and <span class="bad">both</span> eventually tear (<code>set x</code> a touch sooner). Prefer <code>change x by 960</code> anyway: it needs no fixed 480 and keeps working with more tiles, other widths, or a changing speed.</p>
 
 <script>
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 const W=cv.width, H=cv.height;
 // world: show scratch x -720..720 across canvas
-const WORLD=1440, scale=W/WORLD, TILE=480, HALF=TILE/2;
+const WORLD=1440, scale=W/WORLD, TILE=520, HALF=TILE/2;
+// Scratch fences every sprite: it never lets one slide fully off the stage,
+// keeping ~15px on. So a 520-wide tile's centre is clamped to ±485.
+const FENCE=485;
 const sx = x => W/2 + x*scale;            // scratch x -> canvas px
 const GROUND_TOP=170, GROUND_H=110;
 
@@ -100,13 +103,21 @@ function wrapTile(name,val){
   return val;
 }
 
+// Scratch clamps the centre before your script sees it — a 520 tile can't go past ±485.
+function fence(name,v){
+  if(v < -FENCE){ if(v < -FENCE-0.5) log(name+': fence clamps centre '+v.toFixed(0)+' → −485 (~15px kept on stage)'); return -FENCE; }
+  if(v >  FENCE) return FENCE;
+  return v;
+}
+
 function tick(){
   A-=speed; B-=speed;
+  A=fence('A',A); B=fence('B',B);
   A=wrapTile('A',A); B=wrapTile('B',B);
   if(flash.A>0)flash.A--; if(flash.B>0)flash.B--;
 }
 
-// draw one 480-wide tile centered at scratch x=cx
+// draw one 520-wide tile centered at scratch x=cx
 function drawTile(cx,color,letter,fl){
   const left=sx(cx-HALF), w=TILE*scale;
   ctx.fillStyle=color; ctx.fillRect(left,GROUND_TOP,w,GROUND_H);
@@ -179,7 +190,7 @@ function updateHud(){
   document.getElementById('bx').textContent=Math.round(B);
   const gap=Math.abs(A-B), gEl=document.getElementById('gap');
   gEl.textContent=Math.round(gap);
-  gEl.className='v'+(Math.abs(gap-480)>0.5?' bad':'');
+  gEl.className='v'+(gap>519?' bad':'');   // flag only when overlap is nearly gone (tear imminent)
   const c=covered(), cEl=document.getElementById('cov');
   cEl.textContent=c?'yes':'GAP!'; cEl.className='v'+(c?'':' bad');
 }
@@ -200,7 +211,7 @@ document.getElementById('reset').onclick=reset;
 document.getElementById('spd').oninput=e=>{ speed=+e.target.value;
   document.getElementById('spdv').textContent=speed; };
 document.getElementById('rule').onchange=e=>{ rule=e.target.value;
-  log('wrap rule → '+(rule==='seam'?'change x by 960 (seamless)':'set x to 480 (has gap)')); };
+  log('wrap rule → '+(rule==='seam'?'change x by 960 (seamless)':'set x to 480 (less overlap)')); };
 </script>
 </body>
 </html>
