@@ -117,6 +117,14 @@ def when_receive(msg) -> Block:
     return Block("event", r"when I receive %s" % _menu(msg))
 
 
+def when_clone() -> Block:
+    """when I start as a clone — a hat that runs on each new clone the moment it
+    is born. It is a Control block in Scratch, but rendered with the event hat
+    macro (the scratch3 package ships only one hat shape); category 'event' keeps
+    it hat-shaped rather than a stack block."""
+    return Block("event", r"when I start as a clone")
+
+
 # ---- motion ------------------------------------------------------------------
 
 def move(n) -> Block:
@@ -270,6 +278,17 @@ def wait_until(cond) -> Block:
 
 def stop_all() -> Block:
     return Block("control", r"stop %s" % _menu("all"))
+
+
+def create_clone(target="myself") -> Block:
+    """create clone of [myself] — make a live copy that runs its own
+    `when I start as a clone` script."""
+    return Block("control", r"create clone of %s" % _menu(target))
+
+
+def delete_clone() -> Block:
+    """delete this clone — remove this clone so they do not pile up."""
+    return Block("control", r"delete this clone")
 
 
 def _condlabel(cond):

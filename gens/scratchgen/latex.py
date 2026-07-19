@@ -167,7 +167,9 @@ def _activity(idx: int, a: Activity, *, answer: bool) -> str:
         parts.append(_scripts_block(a.scripts, answer=answer, stack=a.stack))
 
     if a.note:
-        parts.append(r"\par\vspace{2pt}\textit{%s}" % a.note)
+        # {\itshape ...} (a font switch, not \textit's non-long argument) so a note
+        # may contain \par / boxes / tabulars without "paragraph ended" errors.
+        parts.append(r"\par\vspace{2pt}{\itshape %s\par}" % a.note)
 
     if a.tasks:
         parts.append(r"\par\vspace{4pt}\textbf{Your task.}\quad Now make your "
@@ -186,12 +188,17 @@ def _activity(idx: int, a: Activity, *, answer: bool) -> str:
 
 def build_document(activities, *, title: str, answer_key: bool,
                    intro: bool = True, palette: list | None = None,
-                   lead: str | None = None) -> str:
+                   lead: str | None = None, reference: bool = False) -> str:
     """`palette` is the list of block-group names to show in the colour key
     (defaults to Scratch A's basic set). `lead` replaces the first-time "What is
-    Scratch?" tour with a short recap for later sheets; the colour key still shows."""
+    Scratch?" tour with a short recap for later sheets; the colour key still shows.
+    `reference` labels the document a teacher reference (finished game, every script
+    shown) rather than a student answer key."""
     body = [_PREAMBLE, r"\begin{document}", r"\wstitle{%s}" % title]
-    if answer_key:
+    if reference:
+        body.append(r"\textit{Teacher reference --- the finished game, every script "
+                    r"shown.}\par\vspace{8pt}")
+    elif answer_key:
         body.append(r"\textit{Answer key --- finished scripts and challenge "
                     r"solutions.}\par\vspace{8pt}")
     else:

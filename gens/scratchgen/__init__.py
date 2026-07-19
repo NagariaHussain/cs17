@@ -8,7 +8,7 @@ to building small projects in Scratch — basic blocks, movement, and events.
 
 from .script import (
     Block, CBlock, Gap, Expr, Script, script, gap,
-    when_flag, when_key, when_clicked, when_receive,
+    when_flag, when_key, when_clicked, when_receive, when_clone,
     move, turn_right, turn_left, goto_xy, glide, point,
     point_towards, goto, glide_to,
     changex, changey, setx, sety, bounce, set_rotation_style,
@@ -17,6 +17,7 @@ from .script import (
     switch_backdrop, change_size, set_size,
     play_sound, play_until,
     wait, forever, repeat, wait_until, stop_all, if_, ifelse, repeat_until,
+    create_clone, delete_clone,
     broadcast, broadcast_wait,
     set_var, change_var, show_var, hide_var, var,
     ask, answer, mouse_x, mouse_y, timer, distance_to,
@@ -28,7 +29,7 @@ from .problem import Activity, BUILD
 
 __all__ = [
     "Block", "CBlock", "Gap", "Expr", "Script", "script", "gap",
-    "when_flag", "when_key", "when_clicked", "when_receive",
+    "when_flag", "when_key", "when_clicked", "when_receive", "when_clone",
     "move", "turn_right", "turn_left", "goto_xy", "glide", "point",
     "point_towards", "goto", "glide_to",
     "changex", "changey", "setx", "sety", "bounce", "set_rotation_style",
@@ -38,6 +39,7 @@ __all__ = [
     "play_sound", "play_until",
     "wait", "forever", "repeat", "wait_until", "stop_all",
     "if_", "ifelse", "repeat_until",
+    "create_clone", "delete_clone",
     "broadcast", "broadcast_wait",
     "set_var", "change_var", "show_var", "hide_var", "var",
     "ask", "answer", "mouse_x", "mouse_y", "timer", "distance_to",

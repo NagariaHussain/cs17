@@ -31,6 +31,9 @@ def main(argv=None):
     ap.add_argument("set", type=Path, help="path to a worksheet .py module")
     ap.add_argument("--out", type=Path, default=Path("build"), help="output dir")
     ap.add_argument("--no-pdf", action="store_true", help="emit .tex but skip Tectonic")
+    ap.add_argument("--answers-only", action="store_true",
+                    help="emit only the filled reference PDF (gaps shown solved, task "
+                         "results shown) - for teacher-reference sheets, not student worksheets")
     args = ap.parse_args(argv)
 
     mod = _load(args.set)
@@ -42,9 +45,11 @@ def main(argv=None):
     outdir = args.out / name
     outdir.mkdir(parents=True, exist_ok=True)
 
-    for suffix, key in (("", False), ("-answers", True)):
+    variants = (("", True),) if args.answers_only else (("", False), ("-answers", True))
+    for suffix, key in variants:
         tex = latex.build_document(activities, title=title, answer_key=key,
-                                   palette=palette, lead=lead)
+                                   palette=palette, lead=lead,
+                                   reference=args.answers_only)
         tex_path = outdir / f"{name}{suffix}.tex"
         tex_path.write_text(tex)
         print(f"wrote {tex_path}")
