@@ -24,6 +24,10 @@ _PREAMBLE = wsbase.preamble(r"""\usepackage{scratch3}
 % repeat-until, so build it from the same internal C-block macro — a finite loop
 % (no infinite flag, no loop arrow) whose header carries the boolean hexagon.
 \newcommand\blockrepeatuntil[2]{\csname scr_blockloop\endcsname{repeat until #1}{#2}{}00}
+% counted repeat: the bundled \blockrepeat draws the count oval but omits the word
+% "repeat", so build our own from the internal C-block macro — a finite loop WITH
+% the loop arrow (infinite off, arrow on) whose header reads "repeat (n)".
+\newcommand\blockrepeatn[2]{\csname scr_blockloop\endcsname{repeat #1}{#2}{}01}
 % a "your turn" gap: a grey stack block the student must replace with the real
 % block. It reuses the package's own block primitive \scr_normalblock{colour}{text}
 % (the same one \blockmove etc. call) so it stacks with correct puzzle nubs; only

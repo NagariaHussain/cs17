@@ -117,6 +117,13 @@ def when_receive(msg) -> Block:
     return Block("event", r"when I receive %s" % _menu(msg))
 
 
+def when_clone() -> Block:
+    """when I start as a clone — the hat every fresh clone runs. It is a Control
+    block in Scratch but drawn as a hat, so it carries the `event` category (the
+    hat shape) like the other hats."""
+    return Block("event", r"when I start as a clone")
+
+
 # ---- motion ------------------------------------------------------------------
 
 def move(n) -> Block:
@@ -272,6 +279,18 @@ def stop_all() -> Block:
     return Block("control", r"stop %s" % _menu("all"))
 
 
+# ---- control: clones ---------------------------------------------------------
+
+def create_clone(target="myself") -> Block:
+    """create clone of [myself] / another sprite — a Control (orange) stack block."""
+    return Block("control", r"create clone of %s" % _menu(target))
+
+
+def delete_clone() -> Block:
+    """delete this clone — a Control cap block that ends the running clone."""
+    return Block("control", r"delete this clone")
+
+
 def _condlabel(cond):
     """The header slot of an if / repeat-until. A `Gap` cond stays a Gap so
     render.py can resolve it per document (a grey "your turn" hexagon on the
@@ -305,6 +324,24 @@ def broadcast(msg) -> Block:
 
 def broadcast_wait(msg) -> Block:
     return Block("broadcast", r"broadcast %s and wait" % _menu(msg))
+
+
+# ---- My Blocks (custom blocks) -----------------------------------------------
+# The crimson "My Blocks" category: a definition hat (`define ...`) plus calls to
+# it. render.py maps the `custom` category to the scratch3 \blockmoreblocks macro.
+
+def define(name, *params) -> Block:
+    """The `define ...` header of a custom block. `params` are the input names,
+    each shown as a white oval: `define("spawn invader", "x", "y")`."""
+    slots = "".join(" " + _oval(p) for p in params)
+    return Block("custom", r"define %s%s" % (_esc(name), slots))
+
+
+def call_block(name, *args) -> Block:
+    """Call a custom block, passing values into its inputs:
+    `call_block("spawn invader", -200, 150)` — args may be numbers or reporters."""
+    slots = "".join(" " + _arg(a) for a in args)
+    return Block("custom", r"%s%s" % (_esc(name), slots))
 
 
 # ---- data: variables ---------------------------------------------------------
@@ -445,6 +482,8 @@ class Script:
 
 
 def script(hat: Block, *body, caption: str = "") -> Script:
-    """Author a script as `script(when_flag(), move(10), say("Hi"))`."""
-    assert hat.category == "event", "a script must start with an event hat block"
+    """Author a script as `script(when_flag(), move(10), say("Hi"))`. A script
+    starts with an event hat, or with a `define(...)` header for a custom block."""
+    assert hat.category in ("event", "custom"), \
+        "a script must start with an event hat or a define(...) header"
     return Script(hat, list(body), caption=caption)
