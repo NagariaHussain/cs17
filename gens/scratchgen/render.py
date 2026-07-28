@@ -26,6 +26,7 @@ _CAT = {
     "control":   r"\blockcontrol",
     "sensing":   r"\blocksensing",
     "data":      r"\blockvariable",
+    "custom":    r"\blockmoreblocks",   # "My Blocks": define header + calls
 }
 
 
@@ -61,9 +62,12 @@ def _emit(blocks: list, answer: bool = False) -> list[str]:
                 lines += _indent(_emit(b.body, answer))
                 lines.append("}")
             elif b.kind == "repeat":
-                # \blockrepeat takes the count as its first argument, body second
+                # \blockrepeatn is defined in the preamble (latex.py): the bundled
+                # \blockrepeat draws the count but drops the word "repeat", so we
+                # build a counted loop (with the loop arrow) from the same internal
+                # C-block macro as \blockforever, its header reading "repeat (n)".
                 count = b.label[len("repeat "):]  # the \ovalnum{...} script.py built
-                lines.append(r"\blockrepeat{%s}{" % count)
+                lines.append(r"\blockrepeatn{%s}{" % count)
                 lines += _indent(_emit(b.body, answer))
                 lines.append("}")
             elif b.kind == "repeatuntil":

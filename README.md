@@ -13,7 +13,7 @@ Source for **cs17.org** course materials. Two kinds of material live here:
 
 ```
 gens/                       shared worksheet-generator engine (the packages below)
-  boolgen/  flowgen/  bingen/  wsbase.py
+  boolgen/  flowgen/  bingen/  segen/  turtlegen/  boxgen/  scratchgen/  wsbase.py
 worksheets/
   worksheet1_boolean_algebra/   worksheet_1_boolean_algebra.py            + build/   (WS1)
   worksheet2_flowcharts/        worksheet_2_flowcharts.py                 + build/   (WS2)
@@ -24,7 +24,11 @@ worksheets/
   worksheet7_loops/             worksheet_7_simple_loops.py             + build/   (WS7)
   worksheet8_flowcharts_intermediate/ worksheet_8_flowcharts_intermediate.py + build/ (WS8)
   worksheet9_logic_and_flowcharts/ worksheet_9_logic_and_flowcharts.py     + build/   (WS9)
-pdfs/                           all PDFs symlinked, split into sheets/ and answer_keys/
+  worksheet10_drawing_flowcharts/ … worksheet18_scratch_dodge/          + build/   (WS10–18)
+  worksheet19_scratch_invaders/ worksheet_19_scratch_invaders.py        + build/   (WS19, Scratch G)
+pdfs/                           all PDFs copied in, split into sheets/ and answer_keys/
+scratch-dino/                   Chrome-Dino reference build (REFERENCE_GAME.md + sliced assets)
+scratch-invaders/               Space-Invaders reference build (REFERENCE_GAME.md + slice_sprite.py + sliced assets)
 assignments/
   q1-p2_jugaad_inventory/       README + build_seed.py + references/
 ```
@@ -34,6 +38,11 @@ assignments/
 - **`gens.boolgen`** — Boolean algebra (logic-gate diagram ↔ expression ↔ truth table).
 - **`gens.flowgen`** — flowcharts of simple algorithms (flowchart ↔ pseudocode ↔ trace table).
 - **`gens.bingen`** — number bases (binary ↔ decimal ↔ hexadecimal, ASCII codes → message).
+- **`gens.segen`** — seven-segment displays; **`gens.turtlegen`** — the coordinate grid;
+  **`gens.boxgen`** — sprite anchor points on the grid.
+- **`gens.scratchgen`** — follow-along **Scratch build-along** sheets: author each finished
+  script once and render it as real Scratch blocks (Scratch A–G, WS12–19). See the
+  [scratchgen section](#scratchgen--scratch-build-along-sheets-ag) below.
 
 All share the same idea: author each problem **once** as a single source of
 truth, then derive every representation from it so they can't disagree. Build
@@ -298,3 +307,91 @@ gens/bingen/
 worksheets/worksheet3_binary/worksheet_3_binary.py   the questions (Worksheet 3)
 worksheets/worksheet4_hexadecimal/worksheet_4_hexadecimal.py the questions (Worksheet 4)
 ```
+
+---
+
+## scratchgen — Scratch build-along sheets (A–G)
+
+Worksheets 12–19 are **follow-along** sheets: not trace-and-predict, but small
+projects the student builds in Scratch at the computer. Unlike the other
+generators (which model an *algorithm* and derive a picture), scratchgen models a
+**Scratch script directly** — a hat block plus the stack beneath it, exactly as it
+appears on the code canvas. Each finished script is authored once, in Python, and
+rendered as real Scratch blocks with the **`scratch3`** LaTeX package, so the
+picture the student matches can never drift from the prose build steps that
+describe it.
+
+The unit is a `BUILD(...)` **project**: a goal, the new blocks it introduces,
+ordered build steps, the finished script(s) to match, and a required "Your task"
+section of progressive enhancements. A `gap(...)` leaves a grey "your turn" hole
+in a script — a plain-words hint on the worksheet, the real block on the answer
+key — which is how the E/F/G capstones ask the student to supply the key pieces.
+
+The sheets ramp A → G:
+
+| Sheet | WS | Game / focus | New power |
+|---|---|---|---|
+| Scratch A | 12 | first projects | basic blocks, movement, events |
+| Scratch B | 13 | sensing & choices | `touching?`, `if`, key sensing |
+| Scratch C | 14 | variables & score | `set` / `change` a variable |
+| Scratch D | 15 | Maze Quest (multi-sprite game) | `broadcast` / `when I receive` |
+| Scratch E | 17 | Coin Dash (gap-fill capstone) | assembling a whole game |
+| Scratch F | 18 | Rock Dodge (gap-fill capstone) | falling + off-screen tests |
+| Scratch G | 19 | **Space Invaders** (reference build) | **clone coordination** + custom blocks |
+
+**Scratch G** is the big capstone — a full Space Invaders shown as a finished
+reference build. Its headline idea is *many clones sharing one brain*: one Invader
+sprite stamps out 55 clones that march, drop, and reverse as a single organism,
+steered by shared variables and a broadcast "conductor". It also introduces
+custom blocks (`define` / call), clone blocks (`create clone of` / `delete this
+clone` / `when I start as a clone`), and reproduces the arcade's famous
+speed-up. The costumes come from `scratch-invaders/` (run its `slice_sprite.py`).
+
+Authoring (a `BUILD` project, rendered via `script(...)`):
+
+```python
+from gens.scratchgen import (
+    BUILD, script, when_flag, forever, if_, key_pressed, changex, gap,
+)
+
+p1 = BUILD(
+    "The ship",
+    goal="Drive the player ship left and right along the bottom row.",
+    steps=["Add a forever loop that reads the arrow keys."],
+    scripts=script(
+        when_flag(),
+        forever(
+            if_(key_pressed("left arrow"), changex(-6)),
+            if_(key_pressed("right arrow"), changex(6)),
+        ),
+        caption="Player: drive left/right",
+    ),
+    tasks=[("Tune the speed to taste.", "The ship feels right.")],
+)
+
+TITLE = "Scratch G"
+ACTIVITIES = [p1]           # build.py reads TITLE + ACTIVITIES (+ optional PALETTE, LEAD)
+```
+
+Build (all Scratch sheets share the generator, so they rebuild together):
+
+```bash
+make scratch    # gens.scratchgen -> worksheets/worksheet12..19/build/
+# one sheet, explicitly:
+WS=worksheets/worksheet19_scratch_invaders
+python -m gens.scratchgen.build $WS/worksheet_19_scratch_invaders.py --out $WS/build
+```
+
+```
+gens/scratchgen/
+  script.py    the Scratch-script model: hat + blocks (events, motion, looks, sound,
+               control, sensing, operators, variables, clones, My Blocks)  (source of truth)
+  problem.py   the BUILD activity (goal / new blocks / steps / scripts / tasks)
+  render.py    Script -> scratch3 LaTeX (category picks the colour, C-blocks recurse)
+  latex.py     front matter + colour key + activity layout + document assembly
+  build.py     CLI: worksheet module -> worksheet/answers PDFs
+worksheets/worksheet19_scratch_invaders/worksheet_19_scratch_invaders.py   Scratch G (Space Invaders)
+```
+
+Needs the `scratch3` LaTeX package (Tectonic auto-downloads it) and the
+**Geist Mono** font installed for the CS17 wordmark in the shared heading.

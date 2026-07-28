@@ -19,6 +19,7 @@ WS15 := worksheets/worksheet15_scratch_game
 WS16 := worksheets/worksheet16_anchor_points
 WS17 := worksheets/worksheet17_scratch_coins
 WS18 := worksheets/worksheet18_scratch_dodge
+WS19 := worksheets/worksheet19_scratch_invaders
 
 .PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors pdfs setup clean
 
@@ -65,14 +66,16 @@ drawing:
 coords:
 	$(PY) -m gens.turtlegen.build $(WS11)/worksheet_11_coordinate_system.py --out $(WS11)/build
 
-# Worksheets 12-18 are the follow-along Scratch build sheets. A-D (12-15) teach
+# Worksheets 12-19 are the follow-along Scratch build sheets. A-D (12-15) teach
 # the blocks, ramping from basics (A/12) through sensing & choices (B/13) and
 # variables & score (C/14) to a complete multi-sprite game (D/15). E-F (17-18)
 # are capstones: one game each, mostly given to drag together but with grey
 # "your turn" gaps the student fills in - Coin Dash (E/17) and Rock Dodge (F/18).
-# Each finished script is authored once in scratchgen and rendered via the
-# scratch3 package, so the blocks shown match the prose build steps. All share
-# the generator, so they rebuild together.
+# G (19) is the big capstone: a full Space Invaders shown as a finished reference
+# build, whose headline concept is clone coordination (a 55-strong fleet of
+# clones sharing one brain) plus custom blocks. Each finished script is authored
+# once in scratchgen and rendered via the scratch3 package, so the blocks shown
+# match the prose build steps. All share the generator, so they rebuild together.
 scratch:
 	$(PY) -m gens.scratchgen.build $(WS12)/worksheet_12_scratch_projects.py --out $(WS12)/build
 	$(PY) -m gens.scratchgen.build $(WS13)/worksheet_13_scratch_sensing.py --out $(WS13)/build
@@ -80,6 +83,7 @@ scratch:
 	$(PY) -m gens.scratchgen.build $(WS15)/worksheet_15_scratch_game.py --out $(WS15)/build
 	$(PY) -m gens.scratchgen.build $(WS17)/worksheet_17_scratch_coins.py --out $(WS17)/build
 	$(PY) -m gens.scratchgen.build $(WS18)/worksheet_18_scratch_dodge.py --out $(WS18)/build
+	$(PY) -m gens.scratchgen.build $(WS19)/worksheet_19_scratch_invaders.py --out $(WS19)/build
 
 # Worksheet 16 bridges Worksheet 11 (points) and the Scratch build sheets: a
 # sprite is not a point but a box, and Scratch pins it to the grid by its centre.
