@@ -465,3 +465,44 @@ restart mechanism, no extra code. Same "it's free" moment as Dino; kids love it.
 Each day = "here's the limited version → feel the pain → learn the tool that fixes it."
 The spine of the course is unchanged from Dino; only the tools at Days 3–4 level up from
 *making* clones to *coordinating* them.
+
+### Costumes to hand out each day (from `assets/sliced/`)
+
+Give students only the art the day needs — a fresh sprite is the reward for the concept
+they just unlocked. Every file below is a real, tight-cropped costume produced by
+`slice_sprite.py`.
+
+| Day | Costumes to upload | Onto which sprite |
+|---|---|---|
+| 0 | `invader_green_1`, `invader_green_2` | Invader (one lone alien, no clones yet) |
+| 1 | `ship_fighter_1`; `bullet_cyan_1` | Player; Bullet |
+| 2 | `explosion_1`…`explosion_4` (optional death puff) | a small Boom sprite, or swap the Invader costume on hit |
+| 3 | the 5 rank colours — `invader_green_*`, `invader_blue_*`, `invader_magenta_*`, `invader_red_*`, `invader_yellow_*` | Invader (costume chosen by `row`, see below) |
+| 4 | `text_game_over` | GameOver |
+| 5 | `text_you_win`, `text_ready`; `life_1` + `pickup_heart`; `ufo_purple` (or `saucer_boss_1`); `bullet_orange_1` (invader bombs); backdrop `planet_brown` / `gem_blue` | YouWin, HUD, UFO, Bomb, Stage |
+
+### Fleet colour ranks (a free authenticity + maths win for Day 3)
+
+In the 1978 arcade the row you shot was worth different points. Reproduce it by picking
+the invader costume from the build loop's `row` counter, and score by rank on the kill:
+
+Because the build loop places `row 0` at the top (`y = 150 - row*28`), row 0 is the
+**back** row — farthest away, worth the most — and `row 4` is the **front** row nearest
+your ship, worth the least (exactly the arcade's 10-point bottom rank):
+
+```
+// inside "spawn invader (x) (y)", before creating the clone:
+if <(row) = (0)> then switch costume to [invader_green_1 v]       // back row (top), worth the most
+if <(row) = (1)> then switch costume to [invader_blue_1 v]
+if <(row) = (2)> then switch costume to [invader_magenta_1 v]
+if <(row) = (3)> then switch costume to [invader_red_1 v]
+if <(row) = (4)> then switch costume to [invader_yellow_1 v]      // front row (closest), cheapest
+```
+
+Then on Day 4's wiggle, `next costume` flips `_1`→`_2` for that colour (upload both frames
+of each rank so the two costumes sit next to each other). And on the kill, score by row:
+`change [score v] by ( (10) + ( ( (4) - (row) ) * (10) ) )` — the far back row pays 50, the
+front row 10, so reaching over the front rank to snipe the back is the risky-greedy play. This
+turns the plain `change score by 10` into a real operators lesson, using art the class can
+see. The other colours (`invader_cyan`, `invader_lime`, `invader_pink_*`, `invader_crab_*`)
+are spares for a second wave or a harder variant.
