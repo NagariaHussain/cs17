@@ -47,14 +47,34 @@ exactly like "the world moves toward the dino" was last time.
 
 | Sprite | Role | Costume notes |
 |---|---|---|
-| **Player** | Your ship. Slides left/right on one row, fires up. | One cannon costume. |
-| **Invader** | The fleet. One sprite → 55 marching clones. | 2 costumes (`inv_a`/`inv_b`) for the classic wiggle. Start hidden. |
-| **Bullet** | Your laser. One clone flies up per shot. | One thin costume. Start hidden. |
-| **GameOver** | "Game Over" text. | A text costume (use the Text tool). Start hidden. |
-| **YouWin** | "You Win" text. | A text costume. Start hidden. |
+| **Player** | Your ship. Slides left/right on one row, fires up. | `ship_fighter_1` (or `ship_delta_1` for the arrow look). |
+| **Invader** | The fleet. One sprite → 55 marching clones. | 2 costumes for the classic wiggle — any colour pair, e.g. `invader_green_1`/`invader_green_2`. Start hidden. |
+| **Bullet** | Your laser. One clone flies up per shot. | `bullet_cyan_1` (cyan/orange/green/magenta all provided). Start hidden. |
+| **GameOver** | "Game Over" text. | `text_game_over`. Start hidden. |
+| **YouWin** | "You Win" text. | `text_you_win`. Start hidden. |
 
 Optional advanced sprites (see *Polish*): **Bomb** (invader return fire), **UFO** (the
-bonus mothership), **Shield** (erodable bunkers).
+bonus mothership — `ufo_purple` or `saucer_boss_1`), **Shield** (erodable bunkers). A
+4-frame `explosion_1..4` is included if you want a death puff when an invader is hit.
+
+## Assets (slicing the sheet)
+
+All costumes are pre-cut from one art sheet. `assets/sheet.png` is the combined
+true-alpha sprite sheet; **`slice_sprite.py`** carves it into individual transparent
+PNGs in `assets/sliced/`, each tight-cropped to its pixels so Scratch hitboxes are fair:
+
+```bash
+python3 slice_sprite.py            # -> assets/sliced/*.png
+python3 slice_sprite.py --scale 2  # 2x bigger, still crisp (nearest-neighbour)
+```
+
+The sheet gives you a whole game's worth of parts: **10 invader colours** (each a 2-frame
+pair), silver/boss saucers, a wide `battlecruiser` miniboss, **6 player ships**, four
+bullet colours plus an `orb_plasma`, pickups (`pickup_heart`, `pickup_shield`,
+`pickup_star`, …), HUD `flag_*` and `life_*` icons, planets/gems for backdrops, the
+`explosion_1..4` animation, and the `text_game_over` / `text_you_win` / `text_ready`
+banners. Upload each PNG onto the matching sprite via the **Costumes** tab → *Upload
+Costume*. The name→file map lives at the bottom of `slice_sprite.py` (`COSTUME_MAP`).
 
 ---
 
