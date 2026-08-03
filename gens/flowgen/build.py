@@ -23,7 +23,8 @@ def _load(path: Path):
     spec = importlib.util.spec_from_file_location("_flowset", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    return getattr(mod, "TITLE", path.stem), getattr(mod, "PROBLEMS")
+    return (getattr(mod, "TITLE", path.stem), getattr(mod, "PROBLEMS"),
+            getattr(mod, "LEAD", ""))
 
 
 def main(argv=None):
@@ -33,7 +34,7 @@ def main(argv=None):
     ap.add_argument("--no-pdf", action="store_true", help="emit .tex + figures but skip Tectonic")
     args = ap.parse_args(argv)
 
-    title, problems = _load(args.set)
+    title, problems, lead = _load(args.set)
     name = args.set.stem
     figs = args.out / name / "figs"
     figs.mkdir(parents=True, exist_ok=True)
@@ -45,12 +46,14 @@ def main(argv=None):
         if getattr(p, "present", "flowchart") == "scratch":
             rendered.append((p, None))  # shown as Scratch blocks; no flowchart figure
             continue
-        render(p.algo, str(figs / f"p{i:02d}"))  # pdf + png + svg
+        render(p.shown_algo, str(figs / f"p{i:02d}"))  # pdf + png + svg
+        if p.kind == "debug":  # the answer key shows the corrected chart beside it
+            render(p.algo, str(figs / f"p{i:02d}-fixed"))
         rendered.append((p, f"figs/p{i:02d}"))
     print(f"rendered {sum(1 for _, f in rendered if f)} flowcharts -> {figs}")
 
     for suffix, key in (("", False), ("-answers", True)):
-        tex = latex.build_document(rendered, title=title, answer_key=key)
+        tex = latex.build_document(rendered, title=title, answer_key=key, lead=lead)
         tex_path = args.out / name / f"{name}{suffix}.tex"
         tex_path.write_text(tex)
         print(f"wrote {tex_path}")

@@ -26,6 +26,7 @@ worksheets/
   worksheet9_logic_and_flowcharts/ worksheet_9_logic_and_flowcharts.py     + build/   (WS9)
   worksheet10_drawing_flowcharts/ … worksheet18_scratch_dodge/          + build/   (WS10–18)
   worksheet19_scratch_invaders/ worksheet_19_scratch_invaders.py        + build/   (WS19, Scratch G)
+  worksheet20_debugging_flowcharts/ worksheet_20_debugging_flowcharts.py + build/  (WS20)
 pdfs/                           all PDFs copied in, split into sheets/ and answer_keys/
 scratch-dino/                   Chrome-Dino reference build (REFERENCE_GAME.md + sliced assets)
 scratch-invaders/               Space-Invaders reference build (REFERENCE_GAME.md + slice_sprite.py + sliced assets)
@@ -57,6 +58,7 @@ make flowchart  # gens.flowgen -> worksheets/worksheet2_flowcharts/build/
 make binary     # gens.bingen  -> worksheets/worksheet3_binary/build/        (Worksheet 3)
 make hex        # gens.bingen  -> worksheets/worksheet4_hexadecimal/build/   (Worksheet 4)
 make mixed      # gens.boolgen -> worksheets/worksheet9_logic_and_flowcharts/build/ (Worksheet 9)
+make debugging  # gens.flowgen -> worksheets/worksheet20_debugging_flowcharts/build/ (Worksheet 20)
 make pdfs       # just rebuild pdfs/sheets + pdfs/answer_keys from existing builds
 ```
 
@@ -192,13 +194,14 @@ Each algorithm is authored once as a small statement tree (`read`, `assign`,
 derived from it. Flowcharts are drawn with **Graphviz** (auto-layout, including
 loop back-edges).
 
-Three problem types:
+Four problem types:
 
 | In `worksheet_2_flowcharts.py`        | Student is given…        | …and must produce       |
 |------------------------------------|--------------------------|-------------------------|
 | `TRACE(algo, {"n": 4})`            | the flowchart + inputs   | the completed trace table |
 | `DRAW(algo)`                       | the pseudocode           | the flowchart           |
 | `OUTPUTS(algo, [{"n": 7}, ...])`   | the flowchart + a table of inputs | the output for each input |
+| `DEBUG(algo, bug, cases=[...], description=…)` | a flowchart with ONE wrong box, what it should do, and should-print vs actually-prints | the box that is wrong, its correction, and why |
 
 Authoring:
 
@@ -221,12 +224,51 @@ string is both shown to the student and executed by the tracer.
 gens/flowgen/
   algo.py       statement model + pseudocode + run() interpreter  (source of truth)
   flowchart.py  Algorithm -> Graphviz flowchart (pdf/png/svg)
-  problem.py    problem kinds: TRACE / DRAW
+  problem.py    problem kinds: TRACE / DRAW / OUTPUTS / DEBUG
+  bug.py        DEBUG's mutators: plant one mistake in a correct algorithm
   latex.py      pseudocode + trace table + document assembly
   build.py      CLI: worksheet module -> figures + worksheet/answers PDFs
 worksheets/worksheet2_flowcharts/worksheet_2_flowcharts.py   the questions
 gens/wsbase.py      shared LaTeX setup (page geometry, cs17.org footer, Tectonic)
 ```
+
+A worksheet module may also define `LEAD` — a paragraph of instructions shown
+under the title on the worksheet (not on the answer key).
+
+### DEBUG — find the one wrong box (Worksheet 20)
+
+`DEBUG` inverts tracing: the student is given a flowchart that is *nearly* right
+and has to work backwards from a wrong output to the box that caused it. The
+**correct** algorithm stays the single source of truth; the mistake is a one-line
+mutation applied to a copy of it (`gens/flowgen/bug.py`):
+
+```python
+DEBUG(pass_fail, wrong_cond("marks >= 40", "marks > 40"),
+      cases=[{"marks": 72}, {"marks": 40}, {"marks": 12}],
+      description="A student passes if they score 40 marks or more. …",
+      why="40 marks must pass, so the test has to include 40 itself. …")
+```
+
+From that pair everything is derived, so the planted bug, the symptom, and the
+correction can never disagree: the **buggy flowchart** (the mutated copy), the
+**should print** column (running the correct algorithm), the **actually prints**
+column (running the buggy one — a runaway loop is cut off and labelled *never
+stops*), and the answer key's **fix** (each mutator reports the box it touched
+and what it should say) plus the **corrected flowchart**. `why` is the only
+authored prose. Available mutators, one per mistake beginners actually make:
+
+| Mutator | The mistake |
+|---------|-------------|
+| `wrong_cond(old, new)` | a decision tests the wrong thing (`>=` vs `>`, `and` vs `or`, an off-by-one loop test) |
+| `wrong_assign(var, old, new)` | a box computes/initialises the wrong value (`sum = 1` instead of `0`) |
+| `wrong_print(old, new)` | the program prints the wrong variable (the total, not the average) |
+| `swap_branches(cond)` | the Yes and No arms are the wrong way round |
+| `missing(line)` | a box is left out — e.g. the counter update, so the loop never ends |
+| `move_into_loop(line)` | a box that belongs after the loop was drawn inside it |
+
+Every mutator asserts it matched exactly one statement, and applying a bug
+asserts the pseudocode actually changed — a bug can never silently fail to apply
+and leave a "buggy" chart that is in fact correct.
 
 Needs the `dot` binary: `brew install graphviz`.
 

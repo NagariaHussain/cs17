@@ -5,6 +5,7 @@ from __future__ import annotations
 from .. import wsbase
 
 from .algo import Algorithm, pseudocode_lines, pseudocode_text, run
+from .bug import outcome
 from .scratch import scratch_blocks
 
 _PREAMBLE = wsbase.preamble(r"""\usepackage{listings}
@@ -144,6 +145,115 @@ def _scratch_centered(algo) -> str:
     return r"\begin{center}" + scratch_blocks(algo, scale=0.82) + r"\end{center}"
 
 
+def _fixed_path(fig_path: str) -> str:
+    """The answer key's corrected flowchart sits beside the buggy one."""
+    return fig_path.replace(".pdf", "-fixed.pdf")
+
+
+def _case_text(case: dict) -> str:
+    """One input case as text: 'n = 3, x = 10, 20, 30'."""
+    bits = []
+    for k, v in case.items():
+        listed = ", ".join(str(x) for x in v) if isinstance(v, (list, tuple)) else str(v)
+        bits.append(f"{k} = {listed}")
+    return ", ".join(bits)
+
+
+def _outputs_text(outputs, never_stops: bool) -> str:
+    """Printed values as the sheet shows them — a runaway loop is cut short and
+    labelled, since 'prints 1 for ever' IS the symptom."""
+    shown = outputs[:5] if never_stops else outputs
+    text = ", ".join(_esc(o) for o in shown)
+    if never_stops:
+        return (text + r", \dots{} \textit{(never stops)}" if text
+                else r"\textit{nothing --- it never stops}")
+    return text or r"\textit{nothing}"
+
+
+def _symptom_table(problem) -> str:
+    """What the program should print vs what it actually prints, for each input:
+    both sides are run, so the symptom can never disagree with the flowchart."""
+    col = lambda w: r">{\raggedright\arraybackslash}p{%s}" % w
+    out = [r"\begin{tabular}{%s|%s|%s}" % (col("3.4cm"), col("4.2cm"), col("4.2cm")),
+           r"\toprule",
+           r"input & should print & actually prints \\", r"\midrule"]
+    for case in problem.cases:
+        should, _ = outcome(problem.algo, case)
+        actual, never_stops = outcome(problem.broken, case)
+        out.append(" & ".join([_esc(_case_text(case)), _outputs_text(should, False),
+                               _outputs_text(actual, never_stops)]) + r" \\")
+    out += [r"\bottomrule", r"\end{tabular}"]
+    return "\n".join(out)
+
+
+def _fix_text(problem) -> str:
+    """The answer: which box is wrong and what it should say. The mutator that
+    planted the bug reports it (see bug.FIXES), so this only phrases it."""
+    kind, *rest = problem.fix
+    box = lambda s: r"\texttt{%s}" % _esc(s)
+    if kind == "replace":
+        wrong, right = rest
+        return "the box %s should be %s" % (box(wrong), box(right))
+    if kind == "missing":
+        missing_box, where = rest
+        return "the box %s is missing%s" % (box(missing_box),
+                                            (" " + where) if where else "")
+    if kind == "moved":
+        moved_box, belongs = rest
+        return ("the box %s has been drawn inside the loop --- it belongs %s"
+                % (box(moved_box), belongs))
+    if kind == "swapped":
+        cond, yes, no = rest
+        return ("the Yes and No arms of the decision %s are the wrong way round: "
+                "Yes should lead to %s and No to %s"
+                % (box(cond), box(yes), box(no)))
+    raise AssertionError(problem.fix)
+
+
+def _answer_lines(*prompts) -> str:
+    """Ruled blanks for the student's answer (the sheets are handed in)."""
+    return "\n".join(
+        r"\par\vspace{8pt}\textbf{%s}~%s~\rule[-0.35em]{%s}{0.4pt}" % (label, text, width)
+        for label, text, width in prompts)
+
+
+def _debug_block(problem, fig_path, *, answer: bool) -> list:
+    parts = [r"\begin{quote}\itshape %s\end{quote}" % _esc(problem.description)]
+    if problem.note:
+        parts.append(r"\par\vspace{2pt}\textit{%s}" % _esc(problem.note))
+    # chart above, symptom table below (not side by side): a chart with a
+    # decision inside a loop comes out WIDE, and a narrow column squashes it
+    parts += [
+        r"\par\vspace{8pt}\begin{center}",
+        r"\includegraphics[max width=\linewidth,"
+        r"max totalheight=0.4\textheight]{%s}" % (
+            _fixed_path(fig_path) if answer else fig_path),
+        r"\par\vspace{10pt}",
+        _symptom_table(problem),
+        r"\end{center}",
+    ]
+    if answer:
+        parts.append(r"\par\vspace{8pt}\textbf{The mistake:}\quad %s."
+                     % _fix_text(problem))
+        if problem.why:
+            parts.append(r"\par\vspace{2pt}\textit{%s}" % _esc(problem.why))
+        parts.append(r"\par\vspace{2pt}\textit{(The flowchart above is the "
+                     r"corrected one.)}")
+    else:
+        parts.append(_answer_lines(
+            ("(i)", "Which box is wrong? Copy it here:", "6cm"),
+            ("(ii)", "What should that box say instead?", "6cm")))
+        # the prompt and its two writing lines are one unit: a page break
+        # between them would leave a stray rule at the top of the next page
+        parts.append(r"\par\vspace{8pt}\begin{minipage}{\linewidth}"
+                     r"\textbf{(iii)}~Why does that mistake produce the wrong "
+                     r"output?"
+                     r"\par\vspace{14pt}\rule{\linewidth}{0.4pt}"
+                     r"\par\vspace{14pt}\rule{\linewidth}{0.4pt}"
+                     r"\end{minipage}")
+    return parts
+
+
 def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
     parts = []
     if problem.kind == "trace" or (problem.kind == "outputs" and problem.inputs):
@@ -152,11 +262,18 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
     elif problem.kind == "draw" and problem.cases:
         # statement + worked example + predict table should not split
         parts.append(r"\Needspace*{0.5\textheight}")
+    elif problem.kind == "debug":
+        # statement + chart + symptom table + answer space is a whole page's
+        # worth: keep it together rather than letting the ruled lines spill over
+        parts.append(r"\Needspace*{0.75\textheight}")
     parts.append(r"\subsection*{Problem %d.}" % idx)
     algo = problem.algo
     noun = "Scratch program" if problem.present == "scratch" else "algorithm"
 
-    if problem.kind == "draw":
+    if problem.kind == "debug":
+        parts += _debug_block(problem, fig_path, answer=answer)
+
+    elif problem.kind == "draw":
         predict = problem.cases  # inputs to predict the output for, before drawing
         if not answer:
             # the statement comes first — it's needed for both parts
@@ -241,21 +358,23 @@ def _problem_block(idx, problem, fig_path, *, answer: bool) -> str:
     return "\n".join(parts)
 
 
-def _section(rendered, *, title, answer_key):
+def _section(rendered, *, title, answer_key, lead=""):
     out = [r"\wstitle{%s}" % title]
     if answer_key:
         out.append(r"\textit{Answer key}\par\vspace{8pt}")
     else:
         out.append(r"\wsnamefield")
+    if lead and not answer_key:  # how to attempt the sheet — students only
+        out.append(r"%s\par\vspace{10pt}" % lead)
     for i, (problem, fig) in enumerate(rendered, 1):
         out.append(_problem_block(i, problem, (fig + ".pdf") if fig else "", answer=answer_key))
         out.append(r"\probrule")
     return out
 
 
-def build_document(rendered, *, title: str, answer_key: bool) -> str:
+def build_document(rendered, *, title: str, answer_key: bool, lead: str = "") -> str:
     """rendered: list of (Problem, fig_path_stem). Returns full .tex source."""
     body = [_PREAMBLE, r"\begin{document}"]
-    body += _section(rendered, title=title, answer_key=answer_key)
+    body += _section(rendered, title=title, answer_key=answer_key, lead=lead)
     body.append(r"\end{document}")
     return "\n".join(body)

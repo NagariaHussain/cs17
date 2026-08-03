@@ -20,11 +20,12 @@ WS16 := worksheets/worksheet16_anchor_points
 WS17 := worksheets/worksheet17_scratch_coins
 WS18 := worksheets/worksheet18_scratch_dodge
 WS19 := worksheets/worksheet19_scratch_invaders
+WS20 := worksheets/worksheet20_debugging_flowcharts
 
-.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors pdfs setup clean
+.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging pdfs setup clean
 
 # Build every worksheet, then collect all PDFs into pdfs/  ->  make
-all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors pdfs
+all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging pdfs
 
 boolean:
 	$(PY) -m gens.boolgen.build $(WS1)/worksheet_1_boolean_algebra.py --out $(WS1)/build
@@ -93,6 +94,15 @@ scratch:
 # renderer for the capstone, all inline (TikZ + scratch3).
 anchors:
 	$(PY) -m gens.boxgen.build $(WS16)/worksheet_16_anchor_points.py --out $(WS16)/build
+
+# Worksheet 20 turns tracing round: every flowchart has exactly ONE wrong box
+# (a boundary comparison, an off-by-one loop test, a missing counter update, a
+# print inside the loop, ...) and the student works backwards from the wrong
+# output to the box. Each problem is authored as the CORRECT algorithm plus a
+# one-line bug (gens/flowgen/bug.py), so the buggy chart, the should-print vs
+# actually-prints table, and the answer key's fix are all derived from one source.
+debugging:
+	$(PY) -m gens.flowgen.build $(WS20)/worksheet_20_debugging_flowcharts.py --out $(WS20)/build
 
 # Gather every PDF into pdfs/ as real copies (build/ holds figures + .tex), split
 # into pdfs/sheets/ (the worksheets) and pdfs/answer_keys/ (the -answers PDFs) so

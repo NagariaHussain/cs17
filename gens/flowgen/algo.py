@@ -118,6 +118,20 @@ def pseudocode_text(algo: Algorithm, indent: str = "    ") -> str:
 _SAFE = {"__builtins__": {}}
 
 
+class Runaway(RuntimeError):
+    """The step limit was hit — the algorithm never stops on these inputs.
+
+    Carries what it had produced up to the cut-off, so a caller can still show
+    the symptom of a never-ending loop (e.g. a debug problem whose buggy
+    flowchart keeps printing 1 forever). Subclasses RuntimeError, so callers
+    that only want "runaway loop" still catch it.
+    """
+
+    def __init__(self, cols, rows, outputs):
+        super().__init__("step limit exceeded — runaway loop?")
+        self.cols, self.rows, self.outputs = cols, rows, outputs
+
+
 def run(algo: Algorithm, inputs: dict, *, step_limit: int = 2000):
     """Execute the algorithm on `inputs`.
 
@@ -155,7 +169,7 @@ def run(algo: Algorithm, inputs: dict, *, step_limit: int = 2000):
         for s in stmts:
             steps[0] += 1
             if steps[0] > step_limit:
-                raise RuntimeError("step limit exceeded — runaway loop?")
+                raise Runaway(cols, rows, outputs)
             if isinstance(s, Input):
                 env[s.var] = queues[s.var].pop(0) if s.var in queues else inputs[s.var]
                 track(s.var)
