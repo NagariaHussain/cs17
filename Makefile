@@ -22,10 +22,12 @@ WS18 := worksheets/worksheet18_scratch_dodge
 WS19 := worksheets/worksheet19_scratch_invaders
 WS20 := worksheets/worksheet20_debugging_flowcharts
 
-.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging pdfs setup clean
+Q1EXAM := exams/q1_final
+
+.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging exams pdfs setup clean
 
 # Build every worksheet, then collect all PDFs into pdfs/  ->  make
-all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging pdfs
+all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging exams pdfs
 
 boolean:
 	$(PY) -m gens.boolgen.build $(WS1)/worksheet_1_boolean_algebra.py --out $(WS1)/build
@@ -104,6 +106,13 @@ anchors:
 debugging:
 	$(PY) -m gens.flowgen.build $(WS20)/worksheet_20_debugging_flowcharts.py --out $(WS20)/build
 
+# Exam question papers (examgen). Each paper module holds the header fields
+# (subject, paper, time allowed) and a QUESTIONS list; an empty list renders the
+# title block alone, which is the boilerplate to fill in. No answer key.
+exams:
+	$(PY) -m gens.examgen.build $(Q1EXAM)/theory.py    --out $(Q1EXAM)/build
+	$(PY) -m gens.examgen.build $(Q1EXAM)/practical.py --out $(Q1EXAM)/build
+
 # Gather every PDF into pdfs/ as real copies (build/ holds figures + .tex), split
 # into pdfs/sheets/ (the worksheets) and pdfs/answer_keys/ (the -answers PDFs) so
 # all worksheets can be browsed from one place. We copy rather than symlink so the
@@ -126,4 +135,4 @@ setup:
 	$(PY) -m pip install -r requirements.txt
 
 clean:
-	rm -rf worksheets/*/build pdfs
+	rm -rf worksheets/*/build exams/*/build pdfs

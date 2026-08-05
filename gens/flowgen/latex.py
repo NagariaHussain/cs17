@@ -55,7 +55,11 @@ def _draw_space(algo: Algorithm) -> str:
             + r"\end{minipage}}\end{center}")
 
 
-def _trace_table(cols, rows, *, fill: bool) -> str:
+def _trace_table(cols, rows, *, fill: bool, row_height: str = "3.4ex",
+                 n_rows: int | None = None) -> str:
+    """`row_height` / `n_rows` tune the blank version — an exam page is tighter
+    than a worksheet's, so examgen asks for shorter rows and exactly as many as
+    the trace needs (see gens/examgen/latex.py)."""
     header = " & ".join(_esc(c) for c in cols) + r" & output"
     if fill:
         spec = "c" * len(cols) + "|c"
@@ -70,17 +74,21 @@ def _trace_table(cols, rows, *, fill: bool) -> str:
         spec = col * len(cols) + "|" + col
         out = [r"\begin{tabular}{%s}" % spec, r"\toprule", header + r" \\", r"\midrule",
                r"\arrayrulecolor{gray!50}"]
-        blank_row = " & ".join([r"\rule{0pt}{3.4ex}"] * (len(cols) + 1)) + r" \\"
-        n_rows = max(6, len(rows) + 2)
+        blank_row = " & ".join([r"\rule{0pt}{%s}" % row_height] * (len(cols) + 1)) + r" \\"
+        n_rows = n_rows or max(6, len(rows) + 2)
         out += [blank_row + (r" \hline" if i < n_rows - 1 else "")
                 for i in range(n_rows)]
         out += [r"\arrayrulecolor{black}", r"\bottomrule", r"\end{tabular}"]
     return "\n".join(out)
 
 
-def _trace_instruction(inputs: dict, noun: str = "algorithm") -> str:
+def _trace_instruction(inputs: dict, noun: str = "algorithm",
+                       closing: str = "and complete the trace table") -> str:
     """E.g. 'Trace this algorithm for $n = 3$, where the values of $marks$
-    entered are 55, 82, 40 (in that order), and complete the trace table.'"""
+    entered are 55, 82, 40 (in that order), and complete the trace table.'
+
+    `closing` is the last clause: a worksheet prints a blank table to complete,
+    an exam paper (examgen) prints none, so the student draws it."""
     scalars = {k: v for k, v in inputs.items() if not isinstance(v, (list, tuple))}
     arrays = {k: v for k, v in inputs.items() if isinstance(v, tuple)}
     queues = {k: v for k, v in inputs.items() if isinstance(v, list)}
@@ -93,7 +101,7 @@ def _trace_instruction(inputs: dict, noun: str = "algorithm") -> str:
     for k, vals in queues.items():
         text += r", where the values of $%s$ entered are %s (in that order)" % (
             _esc(k), _esc(", ".join(str(v) for v in vals)))
-    return text + ", and complete the trace table."
+    return f"{text}, {closing}."
 
 
 def _outputs_table(algo: Algorithm, cases, *, fill: bool) -> str:

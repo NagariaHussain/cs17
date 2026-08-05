@@ -13,3 +13,8 @@ worksheets/**/build/**/*.log
 misc/**/build/**/*.tex
 misc/**/build/**/*.aux
 misc/**/build/**/*.log
+
+# exams/*/build/: same again -- the question-paper PDFs are checked in
+exams/**/build/**/*.tex
+exams/**/build/**/*.aux
+exams/**/build/**/*.log
