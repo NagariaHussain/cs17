@@ -18,14 +18,6 @@ from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
-class Cell:
-    """One spreadsheet cell in a shown table. `blank` marks a column the student
-    has to fill with a formula — drawn as an empty shaded box."""
-    value: str = ""
-    blank: bool = False
-
-
-@dataclass(frozen=True)
 class SheetTable:
     """A table shown as a real spreadsheet grid: lettered columns across the top,
     numbered rows down the side, so the cell references in the question text
@@ -42,6 +34,25 @@ class SheetTable:
     note: str = ""
     new_page: bool = False      # start this table at the top of a fresh page, so a
                                 # long grid is never split from its sheet heading
+
+    def __post_init__(self):
+        """A mis-sized row is an authoring bug, and the renderer zips rows against
+        columns — so extra cells would vanish and short rows would print a ragged
+        grid. Both are caught here rather than reaching a student."""
+        letters = self.letters
+        dupes = sorted({c for c in letters if letters.count(c) > 1})
+        if dupes:
+            raise AssertionError(
+                f"{self.sheet}: duplicate column letters {dupes}")
+        if self.blank_from and self.blank_from not in letters:
+            raise AssertionError(
+                f"{self.sheet}: blank_from {self.blank_from!r} is not a column "
+                f"(have {list(letters)})")
+        for n, row in enumerate(self.rows, 2):
+            if len(row) != len(letters):
+                raise AssertionError(
+                    f"{self.sheet}: row {n} has {len(row)} cells, expected "
+                    f"{len(letters)}")
 
     @property
     def letters(self) -> tuple:

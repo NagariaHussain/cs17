@@ -12,11 +12,11 @@ Scratch answers are drawn by scratchgen's own renderer, so a paper's model
 solution and the build-along worksheets show identical blocks.
 """
 
-from .paper import Paper, Section, Question, Part, SheetTable, Cell
+from .paper import Paper, Section, Question, Part, SheetTable
 from .sheet import Product, Sale, Row, Workbook, Pivot, rupees, plain
 from .latex import fx
 
 __all__ = [
-    "Paper", "Section", "Question", "Part", "SheetTable", "Cell",
+    "Paper", "Section", "Question", "Part", "SheetTable",
     "Product", "Sale", "Row", "Workbook", "Pivot", "rupees", "plain", "fx",
 ]

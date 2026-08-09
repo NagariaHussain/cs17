@@ -86,6 +86,14 @@ class Workbook:
     def __init__(self, products, sales, *, regions=None, categories=None):
         self.products = tuple(products)
         self.sales = tuple(sales)
+
+        # A repeated code would silently win the lookup, so the master table the
+        # student is given and the figures on the key would describe different
+        # products — exactly the drift this class exists to prevent.
+        codes = [p.code for p in self.products]
+        dupes = sorted({c for c in codes if codes.count(c) > 1})
+        assert not dupes, f"duplicate product codes: {dupes}"
+
         self._by_code = {p.code: p for p in self.products}
 
         missing = sorted({s.code for s in self.sales} - set(self._by_code))

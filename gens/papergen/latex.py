@@ -48,17 +48,28 @@ _HEADSTRIP = r"\cellcolor{gray!25}"
 _GUTTER = r">{\columncolor{gray!25}}c"
 
 
+# Applied in ONE pass (see _esc): replacing sequentially would re-escape the
+# braces of an already-substituted replacement, so a source backslash would come
+# out as \textbackslash\{\} — a backslash followed by two literal braces.
+_ESCAPES = {
+    "\\": r"\textbackslash{}",
+    "&": r"\&",
+    "%": r"\%",
+    "#": r"\#",
+    "_": r"\_",
+    "{": r"\{",
+    "}": r"\}",
+    "~": r"\textasciitilde{}",
+    "^": r"\textasciicircum{}",
+    "$": r"\$",
+}
+
+
 def _esc(v) -> str:
     """Escape a data value. Prose fields are author-trusted and bypass this."""
     if v is None:
         return ""
-    s = str(v)
-    for a, b in [("\\", r"\textbackslash{}"), ("&", r"\&"), ("%", r"\%"),
-                 ("#", r"\#"), ("_", r"\_"), ("{", r"\{"), ("}", r"\}"),
-                 ("~", r"\textasciitilde{}"), ("^", r"\textasciicircum{}"),
-                 ("$", r"\$")]:
-        s = s.replace(a, b)
-    return s
+    return "".join(_ESCAPES.get(ch, ch) for ch in str(v))
 
 
 def fx(s: str) -> str:

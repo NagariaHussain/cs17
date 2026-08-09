@@ -219,9 +219,11 @@ SECTION_A = Section(
                        WB.highest_row().name),
                 ),
                 answer_note=r"\textbf{1 mark} for the four formulas, \textbf{1 mark} "
-                            r"for the currency formatting with 2 decimals. Deduct "
-                            r"nothing for \blk{=E2*D2} if the student looked the price "
-                            r"up into H correctly in (a).",
+                            r"for the currency formatting with 2 decimals. Accept a "
+                            r"formula that reaches the unit price another way --- a "
+                            r"nested \blk{=E2*XLOOKUP(C2,...)} rather than "
+                            r"\blk{=E2*H2} --- provided the amount is right; column H "
+                            r"was only ever a convenience.",
             ),
             Part(
                 label="(c)", marks=2, title="Category and region figures",
@@ -255,7 +257,8 @@ SECTION_A = Section(
                      r"Jan--Feb 2026''; X-axis title: ``Region''; Y-axis title: "
                      r"``Total Sales (Rs.)''; and \textbf{data labels} displayed on "
                      r"each column.",
-                answer=r"%s copied down K9:K12, giving:%s"
+                answer=r"%s copied down L9:L12, against the region labels in "
+                       r"K9:K12, giving:%s"
                        % (fx(f"L9  =SUMIF({_REGION},K9,{_AMOUNT})"), _region_rows()),
                 answer_note=r"\textbf{1 mark} for the SUMIF summary table, "
                             r"\textbf{1 mark} for the chart carrying all four "
@@ -296,11 +299,16 @@ SECTION_A = Section(
 TOP_Y, FLOOR_Y = 170, -170
 EDGE = 220
 
+# The starting values, authored once: part (a) asks for them in prose and two of
+# the model scripts set them, so a literal in three places would be three places
+# to forget.
+START_SCORE, START_LIVES, START_TIME = 0, 3, 60
+
 setup_script = script(
     when_flag(),
-    set_var("Score", 0),
-    set_var("Lives", 3),
-    set_var("Time", 60),
+    set_var("Score", START_SCORE),
+    set_var("Lives", START_LIVES),
+    set_var("Time", START_TIME),
     show_var("Score"), show_var("Lives"), show_var("Time"),
     caption="Any sprite (or the Stage): initialise the three variables",
 )
@@ -352,11 +360,17 @@ ladybug_script = script(
 
 timer_script = script(
     when_flag(),
+    # The countdown sets Time itself rather than trusting the setup script to get
+    # there first. Both hats fire on the green flag and Scratch fixes no order
+    # between them; repeat-until tests before its first pass, so on a replay --
+    # when Time is still 0 from the last game -- the loop could otherwise exit at
+    # once and broadcast Game Over before the game had begun.
+    set_var("Time", START_TIME),
     repeat_until(eq(var("Time"), 0),
                  wait(1),
                  change_var("Time", -1)),
     broadcast("Game Over"),
-    caption="Timer: one second per tick, then end the game",
+    caption="Timer: set the clock, one second per tick, then end the game",
 )
 
 gameover_hide_script = script(
@@ -403,8 +417,9 @@ SECTION_B = Section(
                        r"\blk{Lives} and \blk{Time}, and make all three visible on "
                        r"the stage.",
                        r"When the green flag is clicked, the game must "
-                       r"\textbf{initialise} the variables to Score $=$ 0, "
-                       r"Lives $=$ 3, Time $=$ 60."),
+                       r"\textbf{initialise} the variables to Score $=$ %d, "
+                       r"Lives $=$ %d, Time $=$ %d."
+                       % (START_SCORE, START_LIVES, START_TIME)),
                 scripts=(setup_script,),
                 answer_note=r"\textbf{1 mark} backdrop and three correctly named, "
                             r"sensibly sized sprites; \textbf{1 mark} the three "
@@ -485,7 +500,15 @@ SECTION_B = Section(
                             r"The \blk{when I receive} hide script goes on both the "
                             r"Apple and the Ladybug2. Note the countdown keeps running "
                             r"after a lives-out finish, so \blk{Game Over} can be "
-                            r"broadcast twice - harmless here, and not penalised.",
+                            r"broadcast twice - harmless here, and not penalised."
+                            r"\par\vspace{3pt}The model script sets \blk{Time} itself "
+                            r"before counting down. Both hats start on the green flag "
+                            r"and Scratch fixes no order between them, so a countdown "
+                            r"that only reads \blk{Time} can end the game instantly on "
+                            r"a second run, when \blk{Time} is still 0 from the last "
+                            r"one. \textbf{Do not require this} --- a student whose "
+                            r"timer relies on the setup script scores full marks; it "
+                            r"is noted for whoever demonstrates the game twice.",
             ),
         ),
     ),),

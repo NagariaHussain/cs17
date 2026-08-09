@@ -30,6 +30,7 @@ worksheets/
   worksheet20_debugging_flowcharts/ worksheet_20_debugging_flowcharts.py + build/  (WS20)
 papers/
   paper1_practical/             paper_1_practical.py (Calc + Scratch)      + build/
+  paper2_trace/                 paper_2_trace.py (trace a Scratch script)  + build/
 pdfs/                           all PDFs copied in, split into sheets/ and answer_keys/
 scratch-dino/                   Chrome-Dino reference build (REFERENCE_GAME.md + sliced assets)
 scratch-invaders/               Space-Invaders reference build (REFERENCE_GAME.md + slice_sprite.py + sliced assets)
@@ -479,10 +480,21 @@ this; papergen appends its own exam macros to it.
 
 **Paper 1** is the practical: Section A a GreenLeaf Organics data-handling task
 in Calc (XLOOKUP, SUMIFS/SUMIF, a chart and a pivot table, 10 marks), Section B
-the Apple Catcher Scratch game (15 marks).
+the Apple Catcher Scratch game (15 marks). 25 marks, 1 hour 45 minutes.
+
+**Paper 2** is a 10-minute hand-out rather than an exam (4 marks): one small
+Scratch script — a `repeat` loop around an `if/else`, over two variables — that
+the student traces on paper to predict its output. It is the other direction
+from the build-along sheets: the script is *given* (`Question.given`, shown on
+both documents) and the answer is what it prints. Its loop constants drive both
+the blocks and a Python run of the same loop, so the trace table and the final
+answer on the key are computed rather than typed. Being a single question it
+uses an unnamed `Section`, which drops the section band.
 
 ```bash
+make papers     # both papers
 make paper1     # gens.papergen -> papers/paper1_practical/build/
+make paper2     # gens.papergen -> papers/paper2_trace/build/
 # paper only, no answer key (what you print for the exam):
 python -m gens.papergen.build papers/paper1_practical/paper_1_practical.py \
        --out papers/paper1_practical/build --paper-only
@@ -495,5 +507,6 @@ gens/papergen/
   latex.py     exam chrome, spreadsheet grids, per-part marks, document assembly;
                reuses scratchgen for Scratch solutions
   build.py     CLI: paper module -> paper + answer-key PDFs
-papers/paper1_practical/paper_1_practical.py   the questions
+papers/paper1_practical/paper_1_practical.py   the practical (Calc + Scratch)
+papers/paper2_trace/paper_2_trace.py           the trace hand-out
 ```

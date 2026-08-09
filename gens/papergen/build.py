@@ -21,6 +21,8 @@ from . import latex
 
 def _load(path: Path):
     spec = importlib.util.spec_from_file_location("_paper", path)
+    if spec is None or spec.loader is None:
+        raise SystemExit(f"not an importable paper module: {path}")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
@@ -51,7 +53,9 @@ def main(argv=None):
     for suffix, key in variants:
         tex = latex.build_document(paper, answer_key=key)
         tex_path = outdir / f"{name}{suffix}.tex"
-        tex_path.write_text(tex)
+        # explicit encoding: the rendered document carries non-ASCII (en dashes,
+        # rupee figures), which a non-UTF-8 locale would refuse to write
+        tex_path.write_text(tex, encoding="utf-8")
         print(f"wrote {tex_path}")
         if not args.no_pdf:
             wsbase.compile_tex(tex_path)
