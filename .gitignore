@@ -13,3 +13,8 @@ worksheets/**/build/**/*.log
 misc/**/build/**/*.tex
 misc/**/build/**/*.aux
 misc/**/build/**/*.log
+
+# papers/*/build/: keep PDFs, drop LaTeX intermediates
+papers/**/build/**/*.tex
+papers/**/build/**/*.aux
+papers/**/build/**/*.log

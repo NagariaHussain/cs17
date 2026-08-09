@@ -14,6 +14,7 @@ Source for **cs17.org** course materials. Two kinds of material live here:
 ```
 gens/                       shared worksheet-generator engine (the packages below)
   boolgen/  flowgen/  bingen/  segen/  turtlegen/  boxgen/  scratchgen/  wsbase.py
+  papergen/                 graded question papers (sections + marks), not worksheets
 worksheets/
   worksheet1_boolean_algebra/   worksheet_1_boolean_algebra.py            + build/   (WS1)
   worksheet2_flowcharts/        worksheet_2_flowcharts.py                 + build/   (WS2)
@@ -27,6 +28,8 @@ worksheets/
   worksheet10_drawing_flowcharts/ … worksheet18_scratch_dodge/          + build/   (WS10–18)
   worksheet19_scratch_invaders/ worksheet_19_scratch_invaders.py        + build/   (WS19, Scratch G)
   worksheet20_debugging_flowcharts/ worksheet_20_debugging_flowcharts.py + build/  (WS20)
+papers/
+  paper1_practical/             paper_1_practical.py (Calc + Scratch)      + build/
 pdfs/                           all PDFs copied in, split into sheets/ and answer_keys/
 scratch-dino/                   Chrome-Dino reference build (REFERENCE_GAME.md + sliced assets)
 scratch-invaders/               Space-Invaders reference build (REFERENCE_GAME.md + slice_sprite.py + sliced assets)
@@ -437,3 +440,60 @@ worksheets/worksheet19_scratch_invaders/worksheet_19_scratch_invaders.py   Scrat
 
 Needs the `scratch3` LaTeX package (Tectonic auto-downloads it) and the
 **Geist Mono** font installed for the CS17 wordmark in the shared heading.
+
+---
+
+## papergen — graded question papers
+
+Everything above generates **worksheets**: a flat list of practice problems, no
+weighting. A **paper** is a different object, so it gets its own generator:
+
+- **sections** (Section A, Section B), each with its own scenario and questions;
+- a **marks budget** — a part carries marks, a question totals its parts, a
+  section totals its questions, and `Paper.check()` raises if the declared
+  `max_marks` disagrees with what the parts actually add up to, so a paper can
+  never go to print claiming a total it doesn't have;
+- **exam chrome** — duration, maximum marks, and a general-instructions box.
+
+The worksheets' single-source habit is kept wherever there is something to
+derive. A Calc question's data is authored **once** as a `Workbook` (`sheet.py`)
+and every figure on the answer key is *computed* from it — the totals, the
+SUMIFS answers, the region summary, the pivot with both margins, and which
+region comes top. Edit a unit price and the tables the student is given and the
+key's numbers move together. Spreadsheet row numbers are derived too, so the
+cell references in the question text (`in cell I18`) follow the data.
+
+```python
+WB = Workbook(PRODUCTS, SALES)          # the single source
+...
+answer_items=(fx(f"I{TOTAL_ROW}  =SUM(I{FIRST}:I{LAST})") +
+              r"$\rightarrow$ \textbf{%s}" % rupees(WB.grand_total()),)
+```
+
+Scratch answers reuse **scratchgen**: the model solution is authored as ordinary
+`script(...)` objects and drawn by `scratchgen.render_script`, so a paper's
+blocks and the build-along sheets' blocks are the same picture (same
+"reuse, not reimplement" approach as bingen dispatching to boolgen/flowgen).
+`gens/scratchgen/latex.py` exposes its scratch3 setup as `SCRATCH_EXTRA` for
+this; papergen appends its own exam macros to it.
+
+**Paper 1** is the practical: Section A a GreenLeaf Organics data-handling task
+in Calc (XLOOKUP, SUMIFS/SUMIF, a chart and a pivot table, 10 marks), Section B
+the Apple Catcher Scratch game (15 marks).
+
+```bash
+make paper1     # gens.papergen -> papers/paper1_practical/build/
+# paper only, no answer key (what you print for the exam):
+python -m gens.papergen.build papers/paper1_practical/paper_1_practical.py \
+       --out papers/paper1_practical/build --paper-only
+```
+
+```
+gens/papergen/
+  sheet.py     the workbook: products + sales, and every figure derived from them
+  paper.py     Paper / Section / Question / Part / SheetTable + the marks check
+  latex.py     exam chrome, spreadsheet grids, per-part marks, document assembly;
+               reuses scratchgen for Scratch solutions
+  build.py     CLI: paper module -> paper + answer-key PDFs
+papers/paper1_practical/paper_1_practical.py   the questions
+```

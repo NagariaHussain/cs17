@@ -22,10 +22,13 @@ WS18 := worksheets/worksheet18_scratch_dodge
 WS19 := worksheets/worksheet19_scratch_invaders
 WS20 := worksheets/worksheet20_debugging_flowcharts
 
-.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging pdfs setup clean
+PAPER1 := papers/paper1_practical
+PAPER2 := papers/paper2_trace
 
-# Build every worksheet, then collect all PDFs into pdfs/  ->  make
-all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging pdfs
+.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging papers paper1 paper2 pdfs setup clean
+
+# Build every worksheet and paper, then collect all PDFs into pdfs/  ->  make
+all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging papers pdfs
 
 boolean:
 	$(PY) -m gens.boolgen.build $(WS1)/worksheet_1_boolean_algebra.py --out $(WS1)/build
@@ -104,6 +107,23 @@ anchors:
 debugging:
 	$(PY) -m gens.flowgen.build $(WS20)/worksheet_20_debugging_flowcharts.py --out $(WS20)/build
 
+# Graded question papers (papergen) rather than practice worksheets: sections, a
+# marks budget that must add up, and exam chrome. Paper 1 is the practical -
+# Section A a Calc data-handling task (its two tables and every figure on the key
+# derived from one authored Workbook), Section B a Scratch game whose model
+# solution is rendered by scratchgen, so the blocks match the build-along sheets.
+papers: paper1 paper2
+
+paper1:
+	$(PY) -m gens.papergen.build $(PAPER1)/paper_1_practical.py --out $(PAPER1)/build
+
+# Paper 2 is a 10-minute hand-out, not an exam: one small Scratch script (loop +
+# if/else + two variables) that the student traces on paper. The loop's numbers
+# are authored once and drive both the blocks and a Python run of the same loop,
+# so the trace table and final answer on the key are computed from the script.
+paper2:
+	$(PY) -m gens.papergen.build $(PAPER2)/paper_2_trace.py --out $(PAPER2)/build
+
 # Gather every PDF into pdfs/ as real copies (build/ holds figures + .tex), split
 # into pdfs/sheets/ (the worksheets) and pdfs/answer_keys/ (the -answers PDFs) so
 # all worksheets can be browsed from one place. We copy rather than symlink so the
@@ -111,7 +131,7 @@ debugging:
 pdfs:
 	@mkdir -p pdfs/sheets pdfs/answer_keys
 	@rm -f pdfs/sheets/*.pdf pdfs/answer_keys/*.pdf
-	@for f in worksheets/worksheet*/build/*/*.pdf; do \
+	@for f in worksheets/worksheet*/build/*/*.pdf papers/paper*/build/*/*.pdf; do \
 	  [ -e "$$f" ] || continue; \
 	  case "$$f" in \
 	    *-answers.pdf) cp "$$f" "pdfs/answer_keys/$$(basename "$$f")" ;; \
