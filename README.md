@@ -48,7 +48,9 @@ assignments/
   Boolean, trace / draw / debug a flowchart). Flowchart questions wrap `flowgen`
   problems and Boolean ones wrap `boolgen` expressions, so an exam question is
   built from the same single source as the practice it came from. **No answer key
-  is generated** — an exam paper ships on its own.
+  is generated** — an exam paper ships on its own. Where a paper needs a worked
+  key, it builds one beside itself: see
+  [`exams/q1_final/build_answers.py`](exams/q1_final/build_answers.py).
 - **`gens.scratchgen`** — follow-along **Scratch build-along** sheets: author each finished
   script once and render it as real Scratch blocks (Scratch A–G, WS12–19). See the
   [scratchgen section](#scratchgen--scratch-build-along-sheets-ag) below.
@@ -68,6 +70,7 @@ make hex        # gens.bingen  -> worksheets/worksheet4_hexadecimal/build/   (Wo
 make mixed      # gens.boolgen -> worksheets/worksheet9_logic_and_flowcharts/build/ (Worksheet 9)
 make debugging  # gens.flowgen -> worksheets/worksheet20_debugging_flowcharts/build/ (Worksheet 20)
 make exams      # gens.examgen -> exams/q1_final/build/{theory,practical}/  (question papers)
+                # + build_answers.py -> build/theory_answers/  (the theory answer key)
 make pdfs       # just rebuild pdfs/sheets + pdfs/answer_keys from existing builds
 ```
 
