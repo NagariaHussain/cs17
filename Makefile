@@ -112,6 +112,7 @@ debugging:
 exams:
 	$(PY) -m gens.examgen.build $(Q1EXAM)/theory.py    --out $(Q1EXAM)/build
 	$(PY) -m gens.examgen.build $(Q1EXAM)/practical.py --out $(Q1EXAM)/build
+	$(PY) $(Q1EXAM)/build_answers.py
 
 # Gather every PDF into pdfs/ as real copies (build/ holds figures + .tex), split
 # into pdfs/sheets/ (the worksheets) and pdfs/answer_keys/ (the -answers PDFs) so
