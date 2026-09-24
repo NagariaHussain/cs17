@@ -11,7 +11,11 @@ from .. import wsbase
 from .render import render_script
 from .problem import Activity
 
-_PREAMBLE = wsbase.preamble(r"""\usepackage{scratch3}
+# The scratch3 setup, kept separate from the assembled preamble so another
+# generator that shows Scratch blocks can reuse it (papergen does, for the
+# solution scripts on a practical paper's answer key) instead of restating these
+# macro definitions and drifting from them.
+SCRATCH_EXTRA = r"""\usepackage{scratch3}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta}
 \usepackage{enumitem}
@@ -50,7 +54,9 @@ _PREAMBLE = wsbase.preamble(r"""\usepackage{scratch3}
 \setlength{\emergencystretch}{5em}
 \setlist[enumerate]{leftmargin=*,topsep=3pt,itemsep=3pt}
 \setlist[itemize]{leftmargin=*,topsep=3pt,itemsep=3pt}
-""")
+"""
+
+_PREAMBLE = wsbase.preamble(SCRATCH_EXTRA)
 
 
 def _esc(v) -> str:

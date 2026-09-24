@@ -23,12 +23,14 @@ WS19 := worksheets/worksheet19_scratch_invaders
 WS20 := worksheets/worksheet20_debugging_flowcharts
 WS21 := worksheets/worksheet21_terminal_shell
 
+PAPER1 := papers/paper1_practical
+PAPER2 := papers/paper2_trace
 Q1EXAM := exams/q1_final
 
-.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging terminal exams pdfs setup clean
+.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging terminal papers paper1 paper2 exams pdfs setup clean
 
-# Build every worksheet, then collect all PDFs into pdfs/  ->  make
-all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging terminal exams pdfs
+# Build every worksheet, paper and exam, then collect all PDFs into pdfs/  ->  make
+all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging terminal papers exams pdfs
 
 boolean:
 	$(PY) -m gens.boolgen.build $(WS1)/worksheet_1_boolean_algebra.py --out $(WS1)/build
@@ -107,6 +109,23 @@ anchors:
 debugging:
 	$(PY) -m gens.flowgen.build $(WS20)/worksheet_20_debugging_flowcharts.py --out $(WS20)/build
 
+# Graded question papers (papergen) rather than practice worksheets: sections, a
+# marks budget that must add up, and exam chrome. Paper 1 is the practical -
+# Section A a Calc data-handling task (its two tables and every figure on the key
+# derived from one authored Workbook), Section B a Scratch game whose model
+# solution is rendered by scratchgen, so the blocks match the build-along sheets.
+papers: paper1 paper2
+
+paper1:
+	$(PY) -m gens.papergen.build $(PAPER1)/paper_1_practical.py --out $(PAPER1)/build
+
+# Paper 2 is a 10-minute hand-out, not an exam: one small Scratch script (loop +
+# if/else + two variables) that the student traces on paper. The loop's numbers
+# are authored once and drive both the blocks and a Python run of the same loop,
+# so the trace table and final answer on the key are computed from the script.
+paper2:
+	$(PY) -m gens.papergen.build $(PAPER2)/paper_2_trace.py --out $(PAPER2)/build
+
 # Worksheet 21 is the Terminal & Shell drill, and the only sheet that ships a
 # hand-out beside its PDFs: gens.termgen builds cs17-archive.zip from the same
 # tree the worksheet prints and the answer key counts, so the folder on the
@@ -136,7 +155,7 @@ exams:
 pdfs:
 	@mkdir -p pdfs/sheets pdfs/answer_keys
 	@rm -f pdfs/sheets/*.pdf pdfs/answer_keys/*.pdf
-	@for f in worksheets/worksheet*/build/*/*.pdf; do \
+	@for f in worksheets/worksheet*/build/*/*.pdf papers/paper*/build/*/*.pdf; do \
 	  [ -e "$$f" ] || continue; \
 	  case "$$f" in \
 	    *-answers.pdf) cp "$$f" "pdfs/answer_keys/$$(basename "$$f")" ;; \

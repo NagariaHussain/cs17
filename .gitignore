@@ -14,6 +14,11 @@ misc/**/build/**/*.tex
 misc/**/build/**/*.aux
 misc/**/build/**/*.log
 
+# papers/*/build/: keep PDFs, drop LaTeX intermediates
+papers/**/build/**/*.tex
+papers/**/build/**/*.aux
+papers/**/build/**/*.log
+
 # exams/*/build/: same again -- the question-paper PDFs are checked in
 exams/**/build/**/*.tex
 exams/**/build/**/*.aux
