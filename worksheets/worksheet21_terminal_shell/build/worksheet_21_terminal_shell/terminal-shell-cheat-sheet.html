@@ -1,0 +1,202 @@
+<!doctype html><html><head><meta charset='utf-8'><title>Terminal &amp; Shell Cheat Sheet</title><style>
+/* ---- frappe-ui design tokens -------------------------------------------
+   The card is styled with frappe-ui's semantic tokens and type scale so it
+   sits next to the rest of the Frappe-flavoured material. This is a plain
+   printed page, not a Vue app, so there is no Tailwind preset to pull from:
+   the light-mode values below are resolved from frappe-ui's own
+   tailwind/generated/{colors,typography,radius}.json (1.0.0-beta.21) and
+   declared here as custom properties under their token names.
+
+   Two deliberate departures, both because a printed reference is not an app
+   screen:
+   - frappe-ui ships no monospace token (its scale is Inter only), so command
+     text uses Geist Mono, the same face the CS17 worksheets use, sized to the
+     11px text-2xs step.
+   - "Gray everywhere, except where colour encodes meaning" is followed to the
+     letter: headings, commands and output are all gray. Amber is used only on
+     the caution boxes and red only on the one irreversible warning (rm).
+   ------------------------------------------------------------------------ */
+:root {
+  /* text */
+  --ink-gray-9: #0f0f0f;  --ink-gray-8: #171717;  --ink-gray-7: #383838;
+  --ink-gray-6: #525252;  --ink-gray-5: #7c7c7c;  --ink-gray-4: #999999;
+  --ink-amber-8: #bb6f0c; --ink-red-6: #e03434;
+  /* backgrounds */
+  --surface-base: #ffffff; --surface-gray-1: #f8f8f8; --surface-gray-2: #f3f3f3;
+  --surface-amber-1: #fdf8ed;
+  /* borders */
+  --outline-gray-1: #ededed; --outline-gray-2: #e2e2e2;
+  --outline-gray-3: #c7c7c7; --outline-amber-2: #f6eac0;
+  /* radius */
+  --radius-1: 4px; --radius-4: 8px; --radius-5: 10px;
+  /* weight */
+  --fw-regular: 420; --fw-medium: 500; --fw-semibold: 600; --fw-bold: 700;
+}
+@page { size: A4 portrait; margin: 8mm; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+/* frappe-ui's scale is tuned for a 14px screen. Every size below is the token
+   value, unaltered, and the whole card is then rendered at one reduction so it
+   fits two sides of A4 - the same type system seen at 84%, rather than a pile
+   of one-off sizes that no longer match any step on the scale. */
+body { zoom: 0.84; }
+body {
+  margin: 0; background: var(--surface-base); color: var(--ink-gray-9);
+  font-family: "Inter Variable", Inter, "Helvetica Neue", Helvetica, sans-serif;
+  /* text-p-2xs: 11px / 1.6 / 0.01em - the card is mostly helper text, which
+     wraps, so the loose paragraph scale is the right default */
+  font-size: 11px; line-height: 1.6; letter-spacing: 0.01em;
+  font-weight: var(--fw-regular);
+}
+code, pre, .cmd { font-family: "Geist Mono", "SF Mono", Menlo, monospace; }
+
+/* header -------------------------------------------------------------- */
+header { display: flex; align-items: baseline; gap: 8px;
+         border-bottom: 1px solid var(--outline-gray-2);
+         padding-bottom: 6px; margin-bottom: 9px; }
+header .mark { font-family: "Geist Mono", monospace; font-size: 18px;
+               font-weight: var(--fw-bold); letter-spacing: -0.02em;
+               color: var(--ink-gray-5); }
+/* text-2xl: 18px / 1.15 */
+header h1 { margin: 0; font-size: 18px; line-height: 1.15;
+            letter-spacing: 0.01em; font-weight: var(--fw-semibold);
+            color: var(--ink-gray-9); }
+/* text-p-2xs: 11px / 1.6 */
+header .sub { margin-left: auto; font-size: 11px; line-height: 1.6;
+              color: var(--ink-gray-5); text-align: right; }
+
+/* columns -------------------------------------------------------------- */
+.cols { column-count: 2; column-gap: 6mm; }
+section { margin: 0 0 9px; }
+/* text-sm: 13px / 1.15. Sentence case: frappe UIs never shout a heading, so a
+   section is marked by weight and colour, not by capitals. */
+h2 { margin: 0 0 5px; padding-bottom: 3px; font-size: 13px; line-height: 1.15;
+     letter-spacing: 0.02em; font-weight: var(--fw-semibold);
+     color: var(--ink-gray-5); border-bottom: 1px solid var(--outline-gray-1); }
+/* text-p-xs: 12px / 1.6 - a lead paragraph */
+.intro { font-size: 12px; line-height: 1.6; color: var(--ink-gray-6);
+         margin: 0 0 6px; break-inside: avoid; }
+.lead { break-inside: avoid; }
+.entry { break-inside: avoid; margin: 0 0 7px; }
+.head { display: flex; gap: 7px; align-items: baseline; }
+/* text-sm, mono */
+.cmd { font-size: 13px; line-height: 1.15; letter-spacing: 0;
+       font-weight: var(--fw-semibold); color: var(--ink-gray-9);
+       white-space: pre; }
+/* text-xs: 12px / 1.15 - a one-line label, so the tight scale */
+.what { font-size: 12px; line-height: 1.15; letter-spacing: 0.02em;
+        color: var(--ink-gray-6); }
+
+/* transcript ----------------------------------------------------------- */
+/* text-2xs step (11px), the smallest on the scale, at the mono face */
+pre.ex { margin: 3px 0 0; padding: 5px 7px; white-space: pre; overflow: hidden;
+         background: var(--surface-gray-1);
+         border: 1px solid var(--outline-gray-2);
+         border-radius: var(--radius-4);
+         font-size: 11px; line-height: 1.45; letter-spacing: 0;
+         color: var(--ink-gray-7); }
+pre.ex .p { color: var(--ink-gray-4); }                    /* the $ prompt */
+pre.ex .c { color: var(--ink-gray-9); font-weight: var(--fw-medium); }
+pre.ex .ann { color: var(--ink-gray-5); }                  /* the legend */
+.note { color: var(--ink-gray-6); margin-top: 3px; }
+.note b, .intro b, .what b { color: var(--ink-gray-9);
+                             font-weight: var(--fw-semibold); }
+.note .danger { color: var(--ink-red-6); font-weight: var(--fw-semibold); }
+
+/* key / message reference rows ----------------------------------------- */
+table.k { width: 100%; border-collapse: collapse; }
+table.k td { border-top: 1px solid var(--outline-gray-1);
+             padding: 3px 4px 3px 0; vertical-align: top;
+             color: var(--ink-gray-6); }
+table.k tr:first-child td { border-top: 0; }
+table.k td.k { font-family: "Geist Mono", monospace; font-size: 11px;
+               line-height: 1.15; letter-spacing: 0; color: var(--ink-gray-9);
+               font-weight: var(--fw-medium);
+               white-space: nowrap; width: 1%; padding-right: 10px; }
+table.k td b { color: var(--ink-gray-9); font-weight: var(--fw-semibold); }
+
+/* caution box: amber is the one place colour carries meaning ------------ */
+.rule { break-inside: avoid; padding: 6px 8px;
+        background: var(--surface-amber-1);
+        border: 1px solid var(--outline-amber-2);
+        border-radius: var(--radius-4); }
+.rule .note { color: var(--ink-gray-7); margin-top: 0; }
+.rule .note b:first-child { color: var(--ink-amber-8); }
+
+footer { position: fixed; bottom: 0; left: 0; right: 0; font-size: 11px;
+         color: var(--ink-gray-4); display: flex;
+         justify-content: space-between; }
+</style></head><body><header><span class='mark'>CS17</span><h1>Terminal &amp; Shell Cheat Sheet</h1><span class='sub'>Ubuntu, bash</span></header><div class='cols'><section><div class="lead"><h2>The folder used in every example</h2><div class="entry"><pre class="ex">~/work/
+|-- notes.txt    3 lines of text
+|-- report.txt   2 lines of text
+|-- todo.txt     4 lines, 3 of them start with buy
+|-- photos/      cat.jpg  dog.jpg  tree.jpg
+`-- backup/      empty</pre><div class="note">Make it yourself in two minutes and try every line on this card.</div></div></div></section><section><div class="lead"><h2>How a command is built</h2><div class="entry"><div class="head"><span class="cmd">command argument argument</span><span class="what">what to do, then what to do it to</span></div><pre class="ex"><span class="p">$</span> <span class="c">cp notes.txt backup/</span>
+<span class="ann">|  |         |
+|  |         `- where to put it
+|  `----------- what to do it to
+`-------------- the command: what to do</span></pre></div></div><div class="entry"><div class="head"><span class="cmd">command option argument</span><span class="what">an option changes how it is done</span></div><pre class="ex"><span class="p">$</span> <span class="c">ls -l photos</span>
+<span class="ann">|  |  |
+|  |  `- what to do it to
+|  `---- an option: how to do it
+`------- the command</span></pre><div class="note">An option starts with <b>-</b> and is case sensitive. <b>-l</b> and <b>-L</b> are different options.</div></div></section><section><div class="lead"><h2>Where am I, and what is here?</h2><div class="entry"><div class="head"><span class="cmd">pwd</span><span class="what">print the folder you are in</span></div><pre class="ex"><span class="p">$</span> <span class="c">pwd</span>
+/home/you/work</pre><div class="note">It starts at <b>/</b> and leaves nothing out. That is an <b>absolute path</b>.</div></div></div><div class="entry"><div class="head"><span class="cmd">ls</span><span class="what">list what is in a folder</span></div><pre class="ex"><span class="p">$</span> <span class="c">ls</span>
+backup  notes.txt  photos  report.txt  todo.txt
+<span class="p">$</span> <span class="c">ls photos</span>
+cat.jpg  dog.jpg  tree.jpg</pre><div class="note">No folder named? Then it lists the one you are in.</div></div><div class="entry"><div class="head"><span class="cmd">ls -l</span><span class="what">list with the details</span></div><pre class="ex"><span class="p">$</span> <span class="c">ls -l notes.txt</span>
+-rw-rw-r-- 1 you you 59 Sep 15 10:30 notes.txt
+<span class="ann">|                    |  |
+|                    |  `- when it changed
+|                    `---- size in bytes
+`------------------------- - = file, d = folder</span></pre><div class="note"><b>you you</b> is your own username, twice.</div></div><div class="entry"><div class="head"><span class="cmd">ls -a</span><span class="what">list the hidden entries too</span></div><pre class="ex"><span class="p">$</span> <span class="c">ls -a photos</span>
+.  ..  cat.jpg  dog.jpg  tree.jpg</pre><div class="note"><b>.</b> is this folder. <b>..</b> is the folder above it. A hidden name starts with a dot.</div></div><div class="entry"><div class="head"><span class="cmd">cd folder</span><span class="what">go into a folder</span></div><pre class="ex"><span class="p">$</span> <span class="c">cd photos</span>
+<span class="p">$</span> <span class="c">pwd</span>
+/home/you/work/photos</pre><div class="note"><b>cd ..</b> goes up one. <b>cd ../..</b> goes up two. <b>cd ~</b> goes home, and so does <b>cd</b> on its own.</div></div></section><section><div class="lead"><h2>Two ways to say where</h2><div class="entry"><table class="k"><tr><td class='k'>photos</td><td><b>relative</b>: a folder inside the one I am in</td></tr><tr><td class='k'>../report.txt</td><td><b>relative</b>: up one, then that file</td></tr><tr><td class='k'>../../work</td><td><b>relative</b>: up two, then down into work</td></tr><tr><td class='k'>~/work/photos</td><td><b>absolute</b>: start at my home folder</td></tr><tr><td class='k'>/home/you/work</td><td><b>absolute</b>: start at the very top</td></tr></table><div class="note">Relative is shorter, and it still works after the whole folder is moved. Absolute means the same one place from anywhere.</div></div></div></section><section><div class="lead"><h2>Make, read, copy, move, delete</h2><div class="entry"><div class="head"><span class="cmd">mkdir name</span><span class="what">make a folder</span></div><pre class="ex"><span class="p">$</span> <span class="c">mkdir letters</span>
+<span class="p">$</span> <span class="c">mkdir letters/sent letters/draft</span></pre><div class="note">It takes as many names as you give it.</div></div></div><div class="entry"><div class="head"><span class="cmd">touch file</span><span class="what">make an empty file</span></div><pre class="ex"><span class="p">$</span> <span class="c">touch list.txt</span></pre></div><div class="entry"><div class="head"><span class="cmd">cat file</span><span class="what">show what is in a file</span></div><pre class="ex"><span class="p">$</span> <span class="c">cat notes.txt</span>
+Meeting on Monday.
+Bring the camera.
+Ask about the budget.</pre></div><div class="entry"><div class="head"><span class="cmd">head -n 2 file</span><span class="what">show only the first 2 lines</span></div><pre class="ex"><span class="p">$</span> <span class="c">head -n 2 notes.txt</span>
+Meeting on Monday.
+Bring the camera.</pre></div><div class="entry"><div class="head"><span class="cmd">tail -n 1 file</span><span class="what">show only the last line</span></div><pre class="ex"><span class="p">$</span> <span class="c">tail -n 1 notes.txt</span>
+Ask about the budget.</pre><div class="note">Change the number to get more lines. With no <b>-n</b> at all, both show 10. For a file too long for <b>cat</b>.</div></div><div class="entry"><div class="head"><span class="cmd">echo "text"</span><span class="what">print text</span></div><pre class="ex"><span class="p">$</span> <span class="c">echo "Hello there"</span>
+Hello there</pre></div><div class="entry"><div class="head"><span class="cmd">cp from to</span><span class="what">copy it. The original stays</span></div><pre class="ex"><span class="p">$</span> <span class="c">cp notes.txt backup/</span>
+<span class="p">$</span> <span class="c">ls backup</span>
+notes.txt</pre></div><div class="entry"><div class="head"><span class="cmd">mv from to</span><span class="what">move it, or rename it</span></div><pre class="ex"><span class="p">$</span> <span class="c">mv notes.txt backup/        moves it</span>
+<span class="p">$</span> <span class="c">mv notes.txt old-notes.txt  renames it</span></pre><div class="note">Both change the name or the place, so both are <b>mv</b>.</div></div><div class="entry"><div class="head"><span class="cmd">rm file</span><span class="what">delete a file. Permanently</span></div><pre class="ex"><span class="p">$</span> <span class="c">rm list.txt</span></pre><div class="note"><span class='danger'>No Trash. No Undo.</span> Run <b>pwd</b> and <b>ls</b> first, every time.</div></div><div class="entry"><div class="head"><span class="cmd">rmdir folder</span><span class="what">delete a folder, if it is empty</span></div><pre class="ex"><span class="p">$</span> <span class="c">rmdir backup</span></pre></div><div class="entry rule"><div class="note"><b>Silence means success.</b> mkdir, touch, cp, mv, rm and rmdir print nothing when they work. If you see a message, something went wrong. Read it.</div></div></section><section><div class="lead"><h2>Type less</h2><div class="entry"><table class="k"><tr><td class='k'>Tab</td><td>finish the name I started. Type 3 letters, press Tab</td></tr><tr><td class='k'>Tab Tab</td><td>nothing completed? Press again to see every match</td></tr><tr><td class='k'>Up / Down</td><td>step through the commands you already ran</td></tr><tr><td class='k'>history</td><td>list them all, with a number on each</td></tr><tr><td class='k'>clear</td><td>clear the screen. Ctrl+L does the same</td></tr><tr><td class='k'>Ctrl+C</td><td>stop a command that is still running</td></tr></table></div></div><div class="entry"><div class="head"><span class="cmd">"name with spaces"</span><span class="what">quote it, or the shell reads two names</span></div><pre class="ex"><span class="p">$</span> <span class="c">cd My Photos</span>
+bash: cd: too many arguments
+<span class="p">$</span> <span class="c">cd "My Photos"</span></pre><div class="note">Tab does it for you, with a <b>\</b> before each space.</div></div><div class="entry"><div class="head"><span class="cmd">*</span><span class="what">match any text here</span></div><pre class="ex"><span class="p">$</span> <span class="c">ls photos/*.jpg</span>
+photos/cat.jpg  photos/dog.jpg  photos/tree.jpg</pre><div class="note">The <b>shell</b> expands <b>*</b> before the command runs. Check what it matches before you attach it to <b>rm</b>.</div></div></section><section><div class="lead"><h2>Search inside files, and count</h2><div class="entry"><div class="head"><span class="cmd">grep word file</span><span class="what">print every line that contains word</span></div><pre class="ex"><span class="p">$</span> <span class="c">grep buy todo.txt</span>
+buy milk
+buy bread
+buy stamps</pre><div class="note">3 lines came out, so 3 of the 4 jobs are shopping. grep prints the whole line, not the word. It is <b>case sensitive</b>: <b>Buy</b> would find none of these.</div></div></div><div class="entry"><div class="head"><span class="cmd">grep word *.txt</span><span class="what">search several files at once</span></div><pre class="ex"><span class="p">$</span> <span class="c">grep buy *.txt</span>
+todo.txt:buy milk
+todo.txt:buy bread
+todo.txt:buy stamps</pre><div class="note">With more than one file it puts the filename in front, so you can tell the hits apart.</div></div><div class="entry"><div class="head"><span class="cmd">wc file</span><span class="what">count lines, words and bytes</span></div><pre class="ex"><span class="p">$</span> <span class="c">wc notes.txt</span>
+ 3 10 59 notes.txt
+<span class="ann"> | |  |
+ | |  `- bytes
+ | `---- words
+ `------ lines</span></pre><div class="note">The third number is bytes, not letters. For plain English text they are the same. A file with accents or emoji has more bytes than letters, and <b>wc -m</b> counts the letters.</div></div><div class="entry"><div class="head"><span class="cmd">wc -l file</span><span class="what">count the lines only</span></div><pre class="ex"><span class="p">$</span> <span class="c">wc -l *.txt</span>
+  3 notes.txt
+  2 report.txt
+  4 todo.txt
+  9 total</pre><div class="note">Several files? wc adds a <b>total</b> line at the bottom.</div></div></section><section><div class="lead"><h2>Join commands together</h2><div class="entry"><div class="head"><span class="cmd">a | b</span><span class="what">give what a printed to b as its input</span></div><pre class="ex"><span class="p">$</span> <span class="c">grep buy todo.txt | wc -l</span>
+3</pre><div class="note">Read it left to right: <i>find the buy lines, count them</i>. grep never opened a file for wc here.</div></div></div><div class="entry"><div class="head"><span class="cmd">a &gt; file</span><span class="what">write the output into a file. Replaces it</span></div><pre class="ex"><span class="p">$</span> <span class="c">ls photos &gt; list.txt</span>
+<span class="p">$</span> <span class="c">cat list.txt</span>
+cat.jpg
+dog.jpg
+tree.jpg</pre><div class="note">Nothing appears on screen when you run the first line. The output went into the file.</div></div><div class="entry"><div class="head"><span class="cmd">a &gt;&gt; file</span><span class="what">add the output to the end. Keeps the rest</span></div><pre class="ex"><span class="p">$</span> <span class="c">echo "checked by me" &gt;&gt; list.txt</span></pre><div class="note"><b>&gt;&gt;</b> adds. <b>&gt;</b> replaces. Mixing them up is the usual way to lose a file.</div></div></section><section><div class="lead"><h2>Putting it together</h2><div class="intro">A real job, start to finish: pull the shopping lines out of <b>todo.txt</b>, count them, and keep a copy of the notes beside them.</div><div class="entry"><pre class="ex"><span class="p">$</span> <span class="c">cd ~/work</span>
+<span class="p">$</span> <span class="c">mkdir shopping</span>
+<span class="p">$</span> <span class="c">grep buy todo.txt &gt; shopping/list.txt</span>
+<span class="p">$</span> <span class="c">cat shopping/list.txt</span>
+buy milk
+buy bread
+buy stamps
+<span class="p">$</span> <span class="c">wc -l shopping/list.txt</span>
+3 shopping/list.txt
+<span class="p">$</span> <span class="c">cp notes.txt shopping/</span>
+<span class="p">$</span> <span class="c">ls shopping</span>
+list.txt  notes.txt</pre><div class="note">Six commands, one job. Only the ones with something to show printed anything.</div></div></div></section><section><div class="lead"><h2>When it goes wrong</h2><div class="entry"><table class="k"><tr><td class='k'>No such file or directory</td><td>the name is wrong. Check the spelling, the capitals and the <b>.txt</b></td></tr><tr><td class='k'>Not a directory</td><td>that is a file. You cannot <b>cd</b> into a file</td></tr><tr><td class='k'>Directory not empty</td><td><b>rmdir</b> only removes empty folders</td></tr><tr><td class='k'>too many arguments</td><td>a name has spaces in it. Quote it</td></tr><tr><td class='k'>command not found</td><td>the command name is wrong. <b>LS</b> is not <b>ls</b></td></tr><tr><td class='k'>cannot access '*.png'</td><td>nothing matched the <b>*</b></td></tr><tr><td class='k'>Permission denied</td><td>the file is not yours to change. Leave it alone</td></tr></table></div></div><div class="entry"><div class="head"><span class="cmd">ls --help</span><span class="what">ask a command to list its own options</span></div><pre class="ex"><span class="p">$</span> <span class="c">ls --help</span>
+Usage: ls [OPTION]... [FILE]...
+  -a, --all   do not ignore entries starting with .
+  -l          use a long listing format</pre><div class="note">Long output? Try <b>ls --help | head -20</b>.</div></div><div class="entry"><div class="head"><span class="cmd">man ls</span><span class="what">the full manual for a command</span></div><pre class="ex"><span class="p">$</span> <span class="c">man ls</span></pre><div class="note">Arrow keys scroll. Press <b>q</b> to quit.</div></div><div class="entry rule"><div class="note"><b>Stuck? Five checks, in order.</b> 1. Where am I? <b>pwd</b> &nbsp; 2. What is here? <b>ls</b> &nbsp; 3. Is the name exact? Check spelling, capitals, spaces. &nbsp; 4. What does <b>--help</b> or <b>man</b> say? &nbsp; 5. Try again with the corrected name.</div></div><div class="entry rule"><div class="note"><b>Ubuntu counts capitals.</b> <b>notes.txt</b> and <b>NOTES.txt</b> are two different names. <b>ls</b> and <b>LS</b> are two different commands. Type every name the way <b>ls</b> shows it.</div></div></section></div><footer><span>cs17.org</span><span></span></footer></body></html>

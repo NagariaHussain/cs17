@@ -1,0 +1,6 @@
+CS17 Media Club - experiment log, week 2
+Day 1: colour balance test - SUCCESS
+Day 2: rain cover test - FAILED
+Day 3: zoom lens test - FAILED
+Day 4: drone flight test - SUCCESS
+Day 5: sound sync test - SUCCESS

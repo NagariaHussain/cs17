@@ -1,0 +1,6 @@
+CS17 Media Club - experiment log, week 3
+Day 1: green screen test - FAILED
+Day 2: lighting rig test - SUCCESS
+Day 3: slow motion test - SUCCESS
+Day 4: time lapse test - SUCCESS
+Day 5: battery swap test - SUCCESS
