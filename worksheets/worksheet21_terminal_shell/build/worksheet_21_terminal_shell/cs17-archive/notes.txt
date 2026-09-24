@@ -1,0 +1,3 @@
+notes.txt - the everyday notes file. Anyone in the club may edit it.
+Type the name exactly as ls shows it, capitals and all.
+Some computers are fussy about that and some are not. Do not gamble.

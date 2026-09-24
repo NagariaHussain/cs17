@@ -13,7 +13,7 @@ Source for **cs17.org** course materials. Two kinds of material live here:
 
 ```
 gens/                       shared worksheet-generator engine (the packages below)
-  boolgen/  flowgen/  bingen/  segen/  turtlegen/  boxgen/  scratchgen/  wsbase.py
+  boolgen/  flowgen/  bingen/  segen/  turtlegen/  boxgen/  scratchgen/  examgen/  wsbase.py
   papergen/                 graded question papers (sections + marks), not worksheets
 worksheets/
   worksheet1_boolean_algebra/   worksheet_1_boolean_algebra.py            + build/   (WS1)
@@ -28,9 +28,12 @@ worksheets/
   worksheet10_drawing_flowcharts/ … worksheet18_scratch_dodge/          + build/   (WS10–18)
   worksheet19_scratch_invaders/ worksheet_19_scratch_invaders.py        + build/   (WS19, Scratch G)
   worksheet20_debugging_flowcharts/ worksheet_20_debugging_flowcharts.py + build/  (WS20)
+  worksheet21_terminal_shell/   worksheet_21_terminal_shell.py + build/ (WS21, + cs17-archive.zip)
 papers/
   paper1_practical/             paper_1_practical.py (Calc + Scratch)      + build/
   paper2_trace/                 paper_2_trace.py (trace a Scratch script)  + build/
+exams/
+  q1_final/                     theory.py + practical.py (gens.examgen)      + build/
 pdfs/                           all PDFs copied in, split into sheets/ and answer_keys/
 scratch-dino/                   Chrome-Dino reference build (REFERENCE_GAME.md + sliced assets)
 scratch-invaders/               Space-Invaders reference build (REFERENCE_GAME.md + slice_sprite.py + sliced assets)
@@ -45,6 +48,15 @@ assignments/
 - **`gens.bingen`** — number bases (binary ↔ decimal ↔ hexadecimal, ASCII codes → message).
 - **`gens.segen`** — seven-segment displays; **`gens.turtlegen`** — the coordinate grid;
   **`gens.boxgen`** — sprite anchor points on the grid.
+- **`gens.examgen`** — **graded exam question papers** (`exams/`), not worksheets: a
+  paper is a list of parts, each part a list of questions (MCQ, short answer,
+  Boolean, trace / draw / debug a flowchart). Flowchart questions wrap `flowgen`
+  problems and Boolean ones wrap `boolgen` expressions, so an exam question is
+  built from the same single source as the practice it came from. **No answer key
+  is generated** — an exam paper ships on its own.
+- **`gens.termgen`** — **terminal & shell** drills: one authored folder tree becomes
+  the `.zip` the student extracts, the map printed on the sheet, and every number in
+  the answer key. See the [termgen section](#termgen--terminal--shell-drills) below.
 - **`gens.scratchgen`** — follow-along **Scratch build-along** sheets: author each finished
   script once and render it as real Scratch blocks (Scratch A–G, WS12–19). See the
   [scratchgen section](#scratchgen--scratch-build-along-sheets-ag) below.
@@ -63,6 +75,8 @@ make binary     # gens.bingen  -> worksheets/worksheet3_binary/build/        (Wo
 make hex        # gens.bingen  -> worksheets/worksheet4_hexadecimal/build/   (Worksheet 4)
 make mixed      # gens.boolgen -> worksheets/worksheet9_logic_and_flowcharts/build/ (Worksheet 9)
 make debugging  # gens.flowgen -> worksheets/worksheet20_debugging_flowcharts/build/ (Worksheet 20)
+make terminal   # gens.termgen -> worksheets/worksheet21_terminal_shell/build/       (Worksheet 21 + its zip)
+make exams      # gens.examgen -> exams/q1_final/build/{theory,practical}/  (question papers)
 make pdfs       # just rebuild pdfs/sheets + pdfs/answer_keys from existing builds
 ```
 
@@ -510,3 +524,220 @@ gens/papergen/
 papers/paper1_practical/paper_1_practical.py   the practical (Calc + Scratch)
 papers/paper2_trace/paper_2_trace.py           the trace hand-out
 ```
+
+---
+
+## termgen — terminal & shell drills
+
+Worksheet 21 is the only sheet that is done at a real terminal, so it is the only
+one that ships a **hand-out beside its PDFs**: `cs17-archive.zip`, a deliberately
+messy folder the student extracts and then tidies up with commands. It is also
+the only one built in **two formats** — the printed PDF and a **Markdown page for
+the wiki** — from the same source, so the hand-out and the published assignment
+cannot drift apart.
+
+## How it works
+
+The archive is authored **once**, as a tree of `D` (folder) / `F` (text file) /
+`IMG` (real JPEG or PNG) nodes — the single source of truth. From that one tree
+the generator derives, so they can never disagree:
+
+- the **zip** the student extracts (`tree.make_zip`, fixed timestamps so rebuilds
+  do not churn it)
+- the **ASCII map**, which is written into the archive's own `README.txt` and
+  printed on the answer key — not on the worksheet, see below
+- every **number in the answer key** — `wc -l` totals, how many lines `grep`
+  matches, how many files a `*` picks up — read back out of the same content with
+  `nlines`, `ngrep`, `match`, `listing`
+
+The names in the archive are chosen to make the shell's rough edges show up:
+long names (Tab completion), a folder with spaces (quoting and escaping) and a
+three-deep folder (`../../..`). What the archive does **not** contain is just as
+deliberate: there is no `gallery/`, no `backup/` and no `sorted/`. Every folder
+the student moves things into is one they make themselves with `mkdir`.
+
+## The shape of the sheet: one tidy-up, in order
+
+The parts are the steps somebody actually takes when clearing out a messy
+folder, and each command is met at the moment that step needs it — rather than
+walking the command list and inventing a use for each entry.
+
+| Part | Step | Commands it needs |
+|---|---|---|
+| 1 | look at the mess | `pwd` `ls` `ls -l` `ls -a` `cd` `..` `~` `cat` |
+| 2 | build the shelves | `mkdir`, `mkdir -p`, and its two errors |
+| 3 | move everything in | Tab, quoting, `*`, `mv`, `cp` |
+| 4 | throw out what is left | `rm` `rmdir` `--help` `man`, case, safety |
+| 5 | find things and count | `history` `grep` `wc` |
+| 6 | join commands up | `|` `>` `>>` `touch` `echo` `cowsay` |
+| 7 | save your history | `history > history.txt`, `submission/`, `zip -r` |
+
+Folders before files is the load-bearing decision. Because the zip ships with
+nowhere tidy to put anything, Part 3 fills shelves the student built in Part 2,
+and Part 4 can reason about what is left over instead of being told.
+
+Two rules keep that honest. **Every folder Part 2 makes is one a later part
+fills** — `mkdir -p` is taught on `sorted/notes`, which Part 3 moves the club's
+notes into, not on a throwaway. And **Part 4 only ever deletes things that came
+in the zip**: `inbox/old-phone-photos` (shipped empty), `documents/temp` (a junk
+file and a stray `New Folder`) and `documents/drafts`. Asking a student to
+create a folder and then delete it teaches the command but not the judgement,
+which is the whole point of putting deletion last.
+
+**The parts are strictly cumulative.** Part 3 moves into folders Part 2 made,
+Part 4 deletes folders Part 3 emptied, Part 6 counts what Part 3 put there, and
+Part 7 hands in files Part 6 wrote. A task inserted into one part can invalidate
+the state a later part assumes, so after editing, run the whole sequence against
+the freshly built zip before trusting the key.
+
+**The map is not printed on the worksheet.** It lives in the archive's own
+`README.txt`; Part 1 has the student print it with `cat` and copy it out by hand
+into a `BOX`, which is the sheet's first use of the terminal as a source of
+truth. The answer key prints the map, for marking.
+
+> **No two names may differ only in case.** macOS (APFS) and Windows are case
+> *insensitive* by default, so `Notes.txt` and `notes.txt` in the same folder do
+> not both survive the unzip — one silently overwrites the other and the printed
+> map stops matching what the student sees. `tree.check_case_collisions` refuses
+> such a tree at build time. Case sensitivity is taught through command names,
+> options and `grep` instead, which are case sensitive on every machine.
+
+> **The sheet targets one platform: Ubuntu Desktop, so bash and GNU coreutils.**
+> Every error message quoted in the answer key is the exact wording the student
+> will see, verified by running the whole sheet against `ubuntu:24.04` in Docker.
+> It is not interchangeable with macOS: `cp` says `cannot stat 'missing.txt'`
+> where BSD says `missing.txt`, `rmdir` says `failed to remove 'logs'`, an
+> unmatched `*` reaches `ls` instead of being rejected by the shell, and `LS`
+> and `cat NOTES.txt` fail on Ubuntu but succeed on a Mac. Re-verify against a
+> container before retargeting the sheet. `unzip` and `zip` are safe to use in
+> tasks: `ubuntu-desktop` pulls in both. `cowsay` is **not** installed, so the
+> sheet prints `sudo apt install cowsay` as a `given` command; it lands in
+> `/usr/games`, which is on Ubuntu's default PATH but not inside the
+> `ubuntu:24.04` image, so a container check of it needs the PATH set by hand.
+
+## Authoring
+
+A sheet is a list of `PART`s, each a list of plain-English `TASK`s — the action on
+the worksheet, the model command and its expected output on the **answer key
+only** (the lesson plan's teacher note: do not hand out a one-to-one command
+list). The one exception is `given=`, which prints its commands on the worksheet
+too — for a command the sheet neither teaches nor tests, such as the `unzip` that
+has to happen before lesson 1 exists. Three drills are write-in tables instead of
+list items, because writing the answer by hand *is* the exercise: `PATHS`
+(relative vs absolute), `ERRORS` (run it, copy the message back, say why) and
+`PREDICT` (write your prediction, then press Enter). A fourth unit is not a
+drill but a blank: `BOX` reserves a framed, ruled-free area — empty on the
+worksheet, filled with `answer=` on the key — for something whose *shape*
+matters and that a run of ruled lines would flatten, such as an indented tree.
+
+```python
+PART("Where am I?", lesson="Lesson 1", recap=[("pwd", "print the folder you are in")],
+     tasks=[TASK(r"Print where you are.", cmd="pwd", expect="/Users/...", write=1),
+            PATHS([("cs17-archive", "logs", "logs", "~/.../cs17-archive/logs")])])
+```
+
+Build:
+
+```bash
+make terminal
+# explicitly, and without rebuilding the zip:
+WS=worksheets/worksheet21_terminal_shell
+python -m gens.termgen.build $WS/worksheet_21_terminal_shell.py --out $WS/build --no-zip
+```
+
+`make pdfs` collects the two PDFs like any other sheet; the **zip is not copied**
+into `pdfs/` — hand it out from `worksheets/worksheet21_terminal_shell/build/`.
+
+```
+gens/termgen/
+  tree.py     the archive: D/F/IMG nodes, queries (nlines/ngrep/match/listing),
+              ascii_tree, materialise + make_zip, check_case_collisions  (source of truth)
+  task.py     TASK / PATHS / ERRORS / PREDICT and the PART that holds them
+  latex.py    the printed sheet: ruled answer lines, write-in tables, verbatim text
+  markdown.py the same sheet as a wiki page (LaTeX prose -> Markdown, see below)
+  build.py    CLI: worksheet module -> PDFs + Markdown + the zip
+worksheets/worksheet21_terminal_shell/worksheet_21_terminal_shell.py   Worksheet 21
+```
+
+## The three outputs
+
+`build.py` writes, from the one worksheet module: `<name>.pdf` / `<name>.md`
+(the student's sheet, printed and as a wiki page), `<name>-answers.pdf` /
+`<name>-answers.md` (the teacher's), `terminal-shell-cheat-sheet.pdf` (the
+one-page card) and `cs17-archive.zip` (the hand-out). `make pdfs` collects every
+PDF, the cheat sheet included; copy the Markdown out of the worksheet's `build/`
+folder.
+
+**The cheat sheet** (`cheatsheet.py`) is the only thing here that does not go
+through LaTeX. It is a dense two-column card, which CSS columns do in a few
+lines, so it is HTML printed by **headless Chrome** (`--print-to-pdf`). Chrome
+is optional: a missing one warns and skips the card rather than failing the
+build. The budget is **two pages** — two sides of one sheet of paper.
+
+It is styled with **frappe-ui's design tokens and type scale**. There is no
+Tailwind preset to pull from on a printed page, so the light-mode values are
+resolved from frappe-ui's own `tailwind/generated/{colors,typography,radius}.json`
+(1.0.0-beta.21) and declared as custom properties under their token names
+(`--ink-gray-9`, `--surface-gray-1`, `--outline-gray-2`, `--radius-4`, …).
+Three of the design language's rules drive the look:
+
+- **Sentence case headings.** Frappe UIs never shout a heading, so a section is
+  marked by weight and colour (`ink-gray-5`, `text-sm`, 600), never by capitals.
+- **The tight/loose split.** A one-line label takes the tight scale (`text-xs`,
+  line-height 1.15); anything that wraps takes the loose one (`text-p-2xs`, 1.6).
+- **"Gray everywhere, except where colour encodes meaning."** Headings, commands
+  and output are all gray. Amber appears only on the caution boxes, red only on
+  the one irreversible warning (`rm`).
+
+Two departures, both because a printed reference is not an app screen: frappe-ui
+ships no monospace token (its scale is Inter only), so command text uses Geist
+Mono at the 11px `text-2xs` step; and the whole card is rendered at `zoom: 0.84`
+so the screen-tuned scale fits two sides of A4 — the same type system at 84%,
+rather than a pile of one-off sizes that match no step on the scale.
+
+It deliberately does **not** use the assignment archive. A reference should
+still make sense a year later, long after `cs17-archive` has been deleted, so
+every example runs in one tiny made-up folder, `~/work`, printed at the top of
+the card. Each entry carries a real transcript and, where the output needs it, a
+pointer block built by `FIELDS`, which takes the columns from the output line
+itself so the arrows cannot drift away from what they point at:
+
+```
+$ wc notes.txt
+  3  37 194 notes.txt
+  |  |  |
+  |  |  `- characters
+  |  `---- words
+  `------- lines
+```
+
+Every output is copied from a real Ubuntu run of `~/work` — including the ones
+that differ between a terminal and a pipe (`ls` prints columns on a tty, one
+name per line into a pipe). Rebuild that folder in a container and re-verify
+after editing an example. CSS columns **drop** whatever does not fit instead of
+reporting it, so `build.py` counts the pages and warns past two; never silence
+that warning by capping the column height. `cheatsheet.overlong` likewise warns
+about any transcript line past `MAX_COLS` (52 characters at the mono step and
+column width), which `overflow: hidden` would otherwise clip without a word. A heading, its intro and its first
+entry ship inside one unbreakable `.lead` box, because the `break-before` hints
+alone are advisory in multicol and leave headings stranded at a column foot.
+
+Only two things differ between the formats, and both are authored deliberately:
+
+- **Where answers go.** Ruled lines are a paper device, so the module holds
+  `ANSWER_NOTE` (print: "write on this sheet") and `ANSWER_NOTE_MD` (web: "keep
+  your answers in your own document"), and each renderer takes its own.
+- **How prose is translated.** Part intros, notes and captions are authored once
+  as LaTeX, carrying `\cmd{...}`, `\emph{...}`, boxes and lists on purpose.
+  `markdown._md` converts exactly the macros this generator uses and **raises on
+  any macro it does not know**, so a new one fails the build instead of leaking
+  `\cmd{` onto the wiki. Code spans are stashed behind placeholders and restored
+  last — otherwise `~` in `\cmd{~/Desktop}` would be eaten as a LaTeX hard space.
+
+Everything else — task text, commands, expected output, every table — comes from
+the same `PARTS` list, so the printed sheet and the wiki page always agree.
+
+Needs **Pillow** (the archive's `.jpg`/`.png` files are generated, not committed)
+and the `fancyvrb` / `longtable` LaTeX packages, which Tectonic auto-downloads.
+The cheat sheet additionally needs **Google Chrome or Chromium** on the PATH (or
+in `/Applications`); without it the other outputs still build.

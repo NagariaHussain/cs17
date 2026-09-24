@@ -1,0 +1,6 @@
+CS17 Media Club - experiment log, week 4
+Day 1: editing export test - SUCCESS
+Day 2: subtitle test - FAILED
+Day 3: poster print test - SUCCESS
+Day 4: projector test - FAILED
+Day 5: final screening test - SUCCESS

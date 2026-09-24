@@ -18,9 +18,9 @@ import graphviz
 from .algo import Algorithm, Assign, If, Input, Output, While, display_expr
 
 
-def _build_dot(algo: Algorithm) -> graphviz.Digraph:
+def _build_dot(algo: Algorithm, *, nodesep="0.35", ranksep="0.4") -> graphviz.Digraph:
     dot = graphviz.Digraph()
-    dot.attr(rankdir="TB", nodesep="0.35", ranksep="0.4")
+    dot.attr(rankdir="TB", nodesep=nodesep, ranksep=ranksep)
     dot.attr("node", fontname="Helvetica", fontsize="11", margin="0.08,0.05")
     dot.attr("edge", fontname="Helvetica", fontsize="9", arrowsize="0.7")
     ids = itertools.count()
@@ -73,9 +73,16 @@ def _build_dot(algo: Algorithm) -> graphviz.Digraph:
     return dot
 
 
-def render(algo: Algorithm, path_stem: str, formats=("pdf", "png", "svg")):
-    """Render the flowchart and save `path_stem.<fmt>` for each format."""
-    dot = _build_dot(algo)
+def render(algo: Algorithm, path_stem: str, formats=("pdf", "png", "svg"),
+           **spacing):
+    """Render the flowchart and save `path_stem.<fmt>` for each format.
+
+    `spacing` (nodesep / ranksep, in inches) tightens the layout: a chart that
+    has to be scaled down to fit a page keeps bigger label text if the gaps
+    between its boxes are smaller to begin with. Exam papers use it (see
+    gens/examgen/build.py); worksheets keep the roomier default.
+    """
+    dot = _build_dot(algo, **spacing)
     for fmt in formats:
         data = dot.pipe(format=fmt)
         with open(f"{path_stem}.{fmt}", "wb") as f:

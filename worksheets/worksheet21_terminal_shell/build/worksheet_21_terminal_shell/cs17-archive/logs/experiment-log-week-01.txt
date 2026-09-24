@@ -1,0 +1,6 @@
+CS17 Media Club - experiment log, week 1
+Day 1: camera timer test - SUCCESS
+Day 2: night mode test - FAILED
+Day 3: tripod balance test - SUCCESS
+Day 4: battery life test - SUCCESS
+Day 5: microphone test - FAILED

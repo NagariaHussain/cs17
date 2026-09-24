@@ -1,0 +1,5 @@
+camera settings backup
+iso=400
+aperture=f/5.6
+shutter=1/125
+white-balance=daylight

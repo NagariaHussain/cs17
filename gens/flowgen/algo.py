@@ -115,7 +115,10 @@ def pseudocode_text(algo: Algorithm, indent: str = "    ") -> str:
 
 # ---- tracing (execute to build the trace table) ------------------------------
 
-_SAFE = {"__builtins__": {}}
+# No builtins, except the few an algorithm legitimately shows in a box: round()
+# keeps an iterative method (e.g. Babylonian square root) to a fixed number of
+# decimal places, so its trace table holds 4.7 rather than 4.66666666666667.
+_SAFE = {"__builtins__": {}, "round": round, "abs": abs}
 
 
 class Runaway(RuntimeError):
