@@ -21,13 +21,14 @@ WS17 := worksheets/worksheet17_scratch_coins
 WS18 := worksheets/worksheet18_scratch_dodge
 WS19 := worksheets/worksheet19_scratch_invaders
 WS20 := worksheets/worksheet20_debugging_flowcharts
+WS21 := worksheets/worksheet21_terminal_shell
 
 Q1EXAM := exams/q1_final
 
-.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging exams pdfs setup clean
+.PHONY: all boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging terminal exams pdfs setup clean
 
 # Build every worksheet, then collect all PDFs into pdfs/  ->  make
-all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging exams pdfs
+all: boolean flowchart binary hex sevenseg decisions loops intermediate mixed drawing coords scratch anchors debugging terminal exams pdfs
 
 boolean:
 	$(PY) -m gens.boolgen.build $(WS1)/worksheet_1_boolean_algebra.py --out $(WS1)/build
@@ -106,12 +107,27 @@ anchors:
 debugging:
 	$(PY) -m gens.flowgen.build $(WS20)/worksheet_20_debugging_flowcharts.py --out $(WS20)/build
 
+# Worksheet 21 is the Terminal & Shell drill, and the only sheet that ships a
+# hand-out beside its PDFs: gens.termgen builds cs17-archive.zip from the same
+# tree the worksheet prints and the answer key counts, so the folder on the
+# student's machine and the numbers in the key cannot drift apart. The zip lands
+# in the worksheet's build/ folder - hand it out with the printed sheet.
+# This target also writes the same sheet as Markdown (.md and -answers.md) for
+# publishing on the wiki, and a one-page cheat sheet PDF rendered from HTML by
+# headless Chrome (skipped with a warning if no Chrome is installed).
+# `make pdfs` collects the PDFs, cheat sheet included; copy the Markdown
+# straight out of the worksheet's build/ folder.
+terminal:
+	$(PY) -m gens.termgen.build $(WS21)/worksheet_21_terminal_shell.py --out $(WS21)/build
+
 # Exam question papers (examgen). Each paper module holds the header fields
 # (subject, paper, time allowed) and a QUESTIONS list; an empty list renders the
 # title block alone, which is the boilerplate to fill in. No answer key.
 exams:
-	$(PY) -m gens.examgen.build $(Q1EXAM)/theory.py    --out $(Q1EXAM)/build
-	$(PY) -m gens.examgen.build $(Q1EXAM)/practical.py --out $(Q1EXAM)/build
+	$(PY) -m gens.examgen.build $(Q1EXAM)/theory.py      --out $(Q1EXAM)/build
+	$(PY) -m gens.examgen.build $(Q1EXAM)/practical.py   --out $(Q1EXAM)/build
+	$(PY) -m gens.examgen.build $(Q1EXAM)/mock_theory.py   --out $(Q1EXAM)/build
+	$(PY) -m gens.examgen.build $(Q1EXAM)/mock_theory_2.py --out $(Q1EXAM)/build
 
 # Gather every PDF into pdfs/ as real copies (build/ holds figures + .tex), split
 # into pdfs/sheets/ (the worksheets) and pdfs/answer_keys/ (the -answers PDFs) so
